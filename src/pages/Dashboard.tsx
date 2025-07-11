@@ -5,353 +5,352 @@ import {
   BookOpen, 
   FileText, 
   Users, 
-  TrendingUp, 
-  Clock, 
-  Award, 
-  Sparkles, 
-  Brain,
-  Target,
   Calendar,
-  BarChart3,
-  Zap
+  Play,
+  Download,
+  Eye,
+  Trash2,
+  Plus,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { FirebaseService } from '../services/firebaseService';
+import { FirebaseService, GeneratedContent } from '../services/firebaseService';
+import { Modal } from '../components/UI/Modal';
+import { generatePDF } from '../utils/pdfGenerator';
+import toast from 'react-hot-toast';
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const [stats, setStats] = useState<any>({});
+  const [savedContent, setSavedContent] = useState<GeneratedContent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedContent, setSelectedContent] = useState<GeneratedContent | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
-    loadDashboardData();
+    loadSavedContent();
   }, [user]);
 
-  const loadDashboardData = async () => {
+  const loadSavedContent = async () => {
     if (!user) return;
     
     setIsLoading(true);
     try {
-      const teacherStats = await FirebaseService.getTeacherStats(user.uid);
-      setStats(teacherStats);
+      const content = await FirebaseService.getGeneratedContent(user.uid);
+      setSavedContent(content);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('Error loading saved content:', error);
+      toast.error('Error loading saved content');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const statCards = [
+  const handleViewContent = (content: GeneratedContent) => {
+    setSelectedContent(content);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteContent = async (contentId: string) => {
+    if (!confirm('Are you sure you want to delete this content?')) return;
+
+    try {
+      await FirebaseService.deleteGeneratedContent(contentId);
+      setSavedContent(prev => prev.filter(c => c.id !== contentId));
+      toast.success('Content deleted successfully');
+    } catch (error) {
+      console.error('Error deleting content:', error);
+      toast.error('Error deleting content');
+    }
+  };
+
+  const handleDownloadPDF = (content: GeneratedContent) => {
+    generatePDF(content.content, `${content.type}_${content.title.replace(/\s+/g, '_')}`);
+    toast.success('PDF downloaded successfully');
+  };
+
+  const handlePlayAudio = async (content: GeneratedContent) => {
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
+    try {
+      const utterance = new SpeechSynthesisUtterance(content.content);
+      utterance.lang = content.language === 'hindi' ? 'hi-IN' : 
+                      content.language === 'kannada' ? 'kn-IN' :
+                      content.language === 'marathi' ? 'mr-IN' : 'en-US';
+      
+      utterance.onstart = () => setIsPlaying(true);
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = () => {
+        setIsPlaying(false);
+        toast.error('Error playing audio');
+      };
+      
+      speechSynthesis.speak(utterance);
+      toast.success('Playing audio');
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      toast.error('Error playing audio');
+    }
+  };
+
+  const getContentIcon = (type: string) => {
+    switch (type) {
+      case 'story': return BookOpen;
+      case 'worksheet': return FileText;
+      case 'visual-aid': return Eye;
+      case 'concept-explanation': return BookOpen;
+      default: return FileText;
+    }
+  };
+
+  const getContentColor = (type: string) => {
+    switch (type) {
+      case 'story': return 'from-purple-500 to-pink-500';
+      case 'worksheet': return 'from-blue-500 to-cyan-500';
+      case 'visual-aid': return 'from-orange-500 to-red-500';
+      case 'concept-explanation': return 'from-green-500 to-emerald-500';
+      default: return 'from-gray-500 to-slate-500';
+    }
+  };
+
+  const stats = [
     {
-      title: 'Stories Generated',
-      value: stats.contentByType?.story || '0',
+      title: 'Stories Created',
+      value: savedContent.filter(c => c.type === 'story').length,
       icon: BookOpen,
       color: 'from-purple-500 to-pink-500',
-      bgColor: 'from-purple-50 to-pink-50',
-      change: '+12%',
-      changeType: 'positive'
+      bgColor: 'from-purple-50 to-pink-50'
     },
     {
-      title: 'Worksheets Created',
-      value: stats.contentByType?.worksheet || '0',
+      title: 'Worksheets Generated',
+      value: savedContent.filter(c => c.type === 'worksheet').length,
       icon: FileText,
       color: 'from-blue-500 to-cyan-500',
-      bgColor: 'from-blue-50 to-cyan-50',
-      change: '+8%',
-      changeType: 'positive'
+      bgColor: 'from-blue-50 to-cyan-50'
     },
     {
-      title: 'Students Tracked',
-      value: stats.totalStudents || '0',
-      icon: Users,
-      color: 'from-green-500 to-emerald-500',
-      bgColor: 'from-green-50 to-emerald-50',
-      change: '+5%',
-      changeType: 'positive'
-    },
-    {
-      title: 'AI Interactions',
-      value: stats.totalContent || '0',
-      icon: Zap,
+      title: 'Visual Aids',
+      value: savedContent.filter(c => c.type === 'visual-aid').length,
+      icon: Eye,
       color: 'from-orange-500 to-red-500',
-      bgColor: 'from-orange-50 to-red-50',
-      change: '+25%',
-      changeType: 'positive'
+      bgColor: 'from-orange-50 to-red-50'
+    },
+    {
+      title: 'Total Content',
+      value: savedContent.length,
+      icon: Calendar,
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'from-green-50 to-emerald-50'
     }
   ];
-
-  const quickActions = [
-    {
-      title: 'Generate New Story',
-      description: 'Create culturally relevant stories',
-      icon: BookOpen,
-      color: 'purple',
-      path: '/stories',
-      gradient: 'from-purple-500 to-pink-500'
-    },
-    {
-      title: 'Create Worksheet',
-      description: 'Generate worksheets from images',
-      icon: FileText,
-      color: 'blue',
-      path: '/worksheets',
-      gradient: 'from-blue-500 to-cyan-500'
-    },
-    {
-      title: 'Explain Concept',
-      description: 'Get simple explanations',
-      icon: Brain,
-      color: 'green',
-      path: '/concepts',
-      gradient: 'from-green-500 to-emerald-500'
-    },
-    {
-      title: 'Voice Assessment',
-      description: 'AI-powered reading assessment',
-      icon: Award,
-      color: 'red',
-      path: '/assessment',
-      gradient: 'from-red-500 to-orange-500'
-    }
-  ];
-
-  const insights = [
-    {
-      title: 'Most Popular Subject',
-      value: 'Science',
-      description: '45% of your content',
-      icon: Target,
-      color: 'text-blue-600'
-    },
-    {
-      title: 'Average Engagement',
-      value: '92%',
-      description: 'Student participation rate',
-      icon: TrendingUp,
-      color: 'text-green-600'
-    },
-    {
-      title: 'Time Saved',
-      value: '15 hrs',
-      description: 'This month with AI',
-      icon: Clock,
-      color: 'text-purple-600'
-    }
-  ];
-
-  if (isLoading) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-gray-200 rounded-2xl h-32"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8">
-      {/* Header */}
+    <div className="p-4 md:p-6 max-w-7xl mx-auto min-h-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="mb-8"
+        className="mb-6"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Welcome back, {user?.displayName || 'Teacher'}!
-            </h1>
-            <p className="text-gray-600 mt-2">Here's what's happening in your classroom today</p>
-          </div>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-medium"
-          >
-            <div className="flex items-center space-x-2">
-              <Calendar className="w-5 h-5" />
-              <span>{new Date().toLocaleDateString('en-IN', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}</span>
-            </div>
-          </motion.div>
-        </div>
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+          Welcome back, {user?.displayName || 'Teacher'}!
+        </h1>
+        <p className="text-gray-600">Here's your saved content and progress</p>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+        {stats.map((stat, index) => (
           <motion.div
             key={index}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             whileHover={{ scale: 1.02, y: -5 }}
-            className={`bg-gradient-to-br ${stat.bgColor} rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50`}
+            className={`bg-gradient-to-br ${stat.bgColor} rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50`}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
-                <stat.icon className="w-6 h-6 text-white" />
-              </div>
-              <div className={`text-xs font-medium px-2 py-1 rounded-full ${
-                stat.changeType === 'positive' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-              }`}>
-                {stat.change}
+            <div className="flex items-center justify-between mb-2">
+              <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
+                <stat.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
             </div>
             <div>
-              <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
-              <p className="text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
+              <p className="text-gray-600 text-xs md:text-sm font-medium">{stat.title}</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="lg:col-span-2"
-        >
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Quick Actions</h2>
-              <Sparkles className="w-6 h-6 text-purple-600" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {quickActions.map((action, index) => (
-                <motion.a
-                  key={index}
-                  href={action.path}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  className="block p-4 rounded-xl bg-gradient-to-br from-white to-gray-50 border border-gray-200/50 hover:shadow-lg transition-all duration-300 group"
+      {/* Saved Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-4 md:p-6"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-gray-800">Your Saved Content</h2>
+          <div className="text-sm text-gray-600">
+            {savedContent.length} items • Available offline
+          </div>
+        </div>
+        
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your content...</p>
+          </div>
+        ) : savedContent.length === 0 ? (
+          <div className="text-center py-12">
+            <Plus className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-600 mb-2">No content saved yet</p>
+            <p className="text-sm text-gray-500">Start creating stories, worksheets, and more!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {savedContent.map((content, index) => {
+              const Icon = getContentIcon(content.type);
+              const colorClass = getContentColor(content.type);
+              
+              return (
+                <motion.div
+                  key={content.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:shadow-md transition-all duration-200"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-10 h-10 bg-gradient-to-br ${action.gradient} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200`}>
-                      <action.icon className="w-5 h-5 text-white" />
+                  <div className="flex items-start justify-between mb-3">
+                    <div className={`w-10 h-10 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <Icon className="w-5 h-5 text-white" />
                     </div>
-                    <div>
-                      <p className="font-medium text-gray-800 group-hover:text-gray-900">{action.title}</p>
-                      <p className="text-sm text-gray-600">{action.description}</p>
+                    <div className="flex items-center space-x-1">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleViewContent(content)}
+                        className="p-1.5 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200"
+                        title="View"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handlePlayAudio(content)}
+                        className="p-1.5 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition-all duration-200"
+                        title="Play Audio"
+                      >
+                        {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleDownloadPDF(content)}
+                        className="p-1.5 rounded-lg bg-purple-100 text-purple-600 hover:bg-purple-200 transition-all duration-200"
+                        title="Download PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleDeleteContent(content.id)}
+                        className="p-1.5 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.button>
                     </div>
                   </div>
-                </motion.a>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Insights */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="space-y-6"
-        >
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Insights</h2>
-              <BarChart3 className="w-6 h-6 text-blue-600" />
-            </div>
-            <div className="space-y-4">
-              {insights.map((insight, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + index * 0.1 }}
-                  className="flex items-center space-x-3 p-3 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100"
-                >
-                  <insight.icon className={`w-8 h-8 ${insight.color}`} />
-                  <div>
-                    <p className="font-semibold text-gray-800">{insight.value}</p>
-                    <p className="text-sm text-gray-600">{insight.title}</p>
-                    <p className="text-xs text-gray-500">{insight.description}</p>
+                  
+                  <h3 className="font-medium text-gray-800 mb-2 line-clamp-2 text-sm">
+                    {content.title}
+                  </h3>
+                  
+                  <div className="flex items-center justify-between text-xs text-gray-500">
+                    <span className="capitalize">{content.type.replace('-', ' ')}</span>
+                    <span>{content.createdAt.toLocaleDateString()}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mt-2 text-xs">
+                    <span className="bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+                      Grade {content.grade}
+                    </span>
+                    <span className="bg-blue-100 px-2 py-1 rounded-full text-blue-600 capitalize">
+                      {content.language}
+                    </span>
                   </div>
                 </motion.div>
-              ))}
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Content Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={selectedContent?.title || ''}
+        size="lg"
+      >
+        {selectedContent && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 capitalize">
+                  {selectedContent.type.replace('-', ' ')}
+                </span>
+                <span className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-600">
+                  Grade {selectedContent.grade}
+                </span>
+                <span className="bg-green-100 px-3 py-1 rounded-full text-sm text-green-600 capitalize">
+                  {selectedContent.language}
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handlePlayAudio(selectedContent)}
+                  className="flex items-center space-x-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-all duration-200"
+                >
+                  {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  <span>{isPlaying ? 'Stop' : 'Play'}</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleDownloadPDF(selectedContent)}
+                  className="flex items-center space-x-2 bg-purple-100 text-purple-700 px-3 py-2 rounded-lg hover:bg-purple-200 transition-all duration-200"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>PDF</span>
+                </motion.button>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
+                {selectedContent.content}
+              </pre>
+            </div>
+            
+            <div className="text-xs text-gray-500 text-center">
+              Created on {selectedContent.createdAt.toLocaleDateString()} at {selectedContent.createdAt.toLocaleTimeString()}
             </div>
           </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
-            {stats.recentActivity && stats.recentActivity.length > 0 ? (
-              <div className="space-y-3">
-                {stats.recentActivity.slice(0, 3).map((activity: any, index: number) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
-                    className="flex items-start space-x-3 p-3 bg-gradient-to-r from-gray-50 to-white rounded-lg border border-gray-100"
-                  >
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      {activity.type === 'story' && <BookOpen className="w-4 h-4 text-white" />}
-                      {activity.type === 'worksheet' && <FileText className="w-4 h-4 text-white" />}
-                      {activity.type === 'visual-aid' && <Sparkles className="w-4 h-4 text-white" />}
-                      {activity.type === 'concept-explanation' && <Brain className="w-4 h-4 text-white" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 text-sm truncate">{activity.title}</p>
-                      <p className="text-xs text-gray-500">
-                        {activity.date ? new Date(activity.date).toLocaleDateString() : 'Recently'}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6">
-                <Clock className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-gray-600 text-sm">No recent activities</p>
-                <p className="text-xs text-gray-500 mt-1">Start creating content to see your activity here</p>
-              </div>
-            )}
-          </div>
-
-          {/* Tips */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200/50">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <Sparkles className="w-5 h-5 text-purple-600 mr-2" />
-              💡 Teaching Tips
-            </h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Use AI-generated stories to make lessons more engaging and culturally relevant
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Create differentiated worksheets for multi-grade classrooms
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Use voice assessments to improve reading skills in local languages
-              </li>
-              <li className="flex items-start">
-                <span className="text-purple-500 mr-2">•</span>
-                Generate visual aids that can be easily drawn on blackboards
-              </li>
-            </ul>
-          </div>
-        </motion.div>
-      </div>
+        )}
+      </Modal>
     </div>
   );
 };

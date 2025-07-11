@@ -10,6 +10,20 @@ export const useAuth = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
+      
+      // Enable offline persistence for authenticated users
+      if (user) {
+        // Store user session for offline access
+        localStorage.setItem('sahayak_user_session', JSON.stringify({
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          lastLogin: new Date().toISOString()
+        }));
+      } else {
+        // Clear session on logout
+        localStorage.removeItem('sahayak_user_session');
+      }
     });
 
     return () => unsubscribe();

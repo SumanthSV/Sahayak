@@ -45,14 +45,9 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <motion.div
-      initial={{ x: -300, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.3, type: "spring", stiffness: 300, damping: 30 }}
-      className="w-72 bg-white/80 backdrop-blur-lg shadow-xl border-r border-gray-200/50 flex flex-col h-screen"
-    >
+    <div className="fixed left-0 top-0 h-screen w-72 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-gray-200/50 flex flex-col z-50 overflow-hidden">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200/50">
+      <div className="p-6 border-b border-gray-200/50 flex-shrink-0">
         <motion.div
           whileHover={{ scale: 1.02 }}
           className="flex items-center space-x-3"
@@ -115,7 +110,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Bottom Actions */}
-      <div className="p-4 border-t border-gray-200/50 space-y-2">
+      <div className="p-4 border-t border-gray-200/50 space-y-2 flex-shrink-0">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
@@ -140,7 +135,7 @@ const Sidebar: React.FC = () => {
           <span className="font-medium">{t('logout')}</span>
         </motion.button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

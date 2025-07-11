@@ -12,18 +12,17 @@ import {
   Layers,
   Zap
 } from 'lucide-react';
-import { VertexAIService } from '../services/vertexAIService';
 import { FirebaseService } from '../services/firebaseService';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../contexts/LanguageContext';
 import { generatePDF } from '../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import { VertexAIService } from '../services/vertexAIService';
 
 const VisualAids: React.FC = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { currentLanguage } = useLanguage();
-  
   const [topic, setTopic] = useState('');
   const [subject, setSubject] = useState('science');
   const [grade, setGrade] = useState('3');
@@ -113,7 +112,8 @@ const VisualAids: React.FC = () => {
         grade,
         language,
         teacherId: user.uid,
-        metadata: { topic, includeImage }
+        metadata: { topic, includeImage },
+        createdAt: new Date()
       });
       toast.success('Visual aid saved successfully!');
     } catch (error) {

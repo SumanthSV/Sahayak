@@ -17,13 +17,13 @@ import {
   Activity,
   Target
 } from 'lucide-react';
-import { VertexAIService } from '../services/vertexAIService';
 import { FirebaseService } from '../services/firebaseService';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { generatePDF } from '../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import { AIService } from '../services/aiService';
 
 const ConceptExplainer: React.FC = () => {
   const { t } = useTranslation();
@@ -104,7 +104,7 @@ const ConceptExplainer: React.FC = () => {
     
     setIsExplaining(true);
     try {
-      const result = await VertexAIService.explainConceptAdaptively({
+      const result = await AIService.explainConceptAdaptively({
         question,
         difficulty,
         subject: subject || undefined,
@@ -136,7 +136,8 @@ const ConceptExplainer: React.FC = () => {
         language,
         teacherId: user.uid,
         tags: ['concept', 'explanation', difficulty, learningStyle],
-        metadata: { question, difficulty, subject, learningStyle }
+        metadata: { question, difficulty, subject, learningStyle },
+        date: new Date()
       });
       toast.success('Explanation saved successfully!');
     } catch (error) {

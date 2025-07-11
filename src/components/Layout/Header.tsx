@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bell, Search, User, Globe } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -8,12 +8,25 @@ const Header: React.FC = () => {
   const { currentLanguage, changeLanguage, availableLanguages } = useLanguage();
   const { user } = useAuth();
 
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const languageRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (languageRef.current && !(languageRef.current as any).contains(e.target)) {
+        setShowLanguageDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-6 py-4"
+      className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-6 py-4 z-40 relative"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -29,32 +42,42 @@ const Header: React.FC = () => {
 
         <div className="flex items-center space-x-4">
           {/* Language Selector */}
-          <div className="relative group">
-            <button className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gray-100/50 hover:bg-gray-200/50 transition-all duration-200">
+          <div className="relative z-[9999]" ref={languageRef}>
+            <button
+              onClick={() => setShowLanguageDropdown(prev => !prev)}
+              className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-gray-100/50 hover:bg-gray-200/50 transition-all duration-200"
+            >
               <Globe className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">
                 {availableLanguages.find(lang => lang.code === currentLanguage)?.flag}
               </span>
             </button>
-            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-              {availableLanguages.map((language) => (
-                <button
-                  key={language.code}
-                  onClick={() => changeLanguage(language.code)}
-                  className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-all duration-200 flex items-center space-x-3 ${
-                    currentLanguage === language.code ? 'bg-purple-50 text-purple-700' : 'text-gray-700'
-                  } ${language === availableLanguages[0] ? 'rounded-t-xl' : ''} ${
-                    language === availableLanguages[availableLanguages.length - 1] ? 'rounded-b-xl' : ''
-                  }`}
-                >
-                  <span className="text-lg">{language.flag}</span>
-                  <div>
-                    <div className="font-medium">{language.nativeName}</div>
-                    <div className="text-xs text-gray-500">{language.name}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            {showLanguageDropdown && (
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-[9999]">
+                {availableLanguages.map((language, idx) => (
+                  <button
+                    key={language.code}
+                    onClick={() => {
+                      changeLanguage(language.code);
+                      setShowLanguageDropdown(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-all duration-200 flex items-center space-x-3 ${
+                      currentLanguage === language.code
+                        ? 'bg-purple-50 text-purple-700'
+                        : 'text-gray-700'
+                    } ${idx === 0 ? 'rounded-t-xl' : ''} ${
+                      idx === availableLanguages.length - 1 ? 'rounded-b-xl' : ''
+                    }`}
+                  >
+                    <span className="text-lg">{language.flag}</span>
+                    <div>
+                      <div className="font-medium">{language.nativeName}</div>
+                      <div className="text-xs text-gray-500">{language.name}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Notifications */}
