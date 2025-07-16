@@ -72,16 +72,18 @@ function App() {
     <LanguageProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         {/* Skip Link for Accessibility */}
-        <a href="#main-content" className="skip-link">
+        {/* <a href="#main-content" className="skip-link">
           Skip to main content
-        </a>
+        </a> */}
 
         {/* Offline Indicator */}
-        
+             
+             
+        {user && ( <OfflineIndicator isOnline={isOnline} />)}
         
         <AnimatePresence mode="wait">
           <Suspense fallback={<LoadingSpinner />}>
-            {user ? (
+            {!user ? (
               <Routes>
                 <Route path="/signup" element={
                   <motion.div
@@ -112,7 +114,6 @@ function App() {
               </Routes>
             ) : (
               <>
-              <OfflineIndicator isOnline={isOnline} />
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Navigate to="/dashboard" replace />} />

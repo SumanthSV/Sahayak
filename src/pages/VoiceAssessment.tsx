@@ -310,7 +310,8 @@ const VoiceAssessment: React.FC = () => {
         grade: selectedGrade,
         language: selectedLanguage,
         teacherId: user.uid,
-        metadata: { studentName, assessmentType: 'voice-reading' }
+        metadata: { studentName, assessmentType: 'voice-reading' },
+        createdAt: new Date()
       });
       toast.success('Assessment saved successfully!');
     } catch (error) {
@@ -361,7 +362,7 @@ const VoiceAssessment: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
               AI Voice Assessment
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">Assess students' reading skills with AI-powered voice analysis</p>
+            <p className="text-gray-600 text-sm md:text-base">Assess students reading skills with AI-powered voice analysis</p>
           </div>
         </div>
       </motion.div>

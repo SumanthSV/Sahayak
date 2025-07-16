@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import ResponsiveSidebar from '../UI/ResponsiveSidebar';
+import ResponsiveSidebar from './ResponsiveSidebar';
 import Header from './Header';
 import { VoiceButton } from '../UI/VoiceButton';
 import { OfflineIndicator } from '../UI/OfflineIndicator';
