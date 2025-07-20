@@ -21,6 +21,7 @@ const VisualAids = React.lazy(() => import('./pages/VisualAids'));
 const VoiceAssessment = React.lazy(() => import('./pages/VoiceAssessment'));
 const LessonPlanner = React.lazy(() => import('./pages/LessonPlanner'));
 const StudentTracker = React.lazy(() => import('./pages/StudentTracker'));
+const Games = React.lazy(() => import('./pages/Games'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 
 function App() {
@@ -71,15 +72,13 @@ function App() {
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Skip Link for Accessibility */}
-        {/* <a href="#main-content" className="skip-link">
+        {/* Skip Link for Accessibility
+        <a href="#main-content" className="skip-link">
           Skip to main content
         </a> */}
 
         {/* Offline Indicator */}
-             
-             
-        {user && ( <OfflineIndicator isOnline={isOnline} />)}
+        <OfflineIndicator isOnline={isOnline} />
         
         <AnimatePresence mode="wait">
           <Suspense fallback={<LoadingSpinner />}>
@@ -113,7 +112,6 @@ function App() {
                 } />
               </Routes>
             ) : (
-              <>
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Navigate to="/dashboard" replace />} />
@@ -125,16 +123,16 @@ function App() {
                   <Route path="assessment" element={<VoiceAssessment />} />
                   <Route path="planner" element={<LessonPlanner />} />
                   <Route path="tracking" element={<StudentTracker />} />
+                  <Route path="games" element={<Games />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
-              </>
             )}
           </Suspense>
         </AnimatePresence>
 
-        {/* Global Voice Button - Only show when user is logged in
+        {/* Global Voice Button - Only show when user is logged in */}
         {user && (
           <VoiceButton 
             position="fixed"
@@ -143,7 +141,7 @@ function App() {
             onStartRecording={() => setIsVoiceActive(true)}
             onStopRecording={() => setIsVoiceActive(false)}
           />
-        )} */}
+        )}
       </div>
     </LanguageProvider>
   );

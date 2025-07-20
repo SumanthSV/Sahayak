@@ -22,16 +22,7 @@ import { FirebaseService } from '../services/firebaseService';
 import { AIService } from '../services/aiService';
 import toast from 'react-hot-toast';
 
-interface AssessmentResult {
-  accuracy: number;
-  fluency: number;
-  pronunciation: number;
-  overallScore: number;
-  feedback: string;
-  detailedAnalysis: string;
-  improvementAreas: string[];
-  strengths: string[];
-}
+import type { VoiceEvaluationResult } from '../services/aiService';
 
 const VoiceAssessment: React.FC = () => {
   const { t } = useTranslation();
@@ -44,10 +35,11 @@ const VoiceAssessment: React.FC = () => {
   const [assessmentText, setAssessmentText] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('3');
   const [selectedLanguage, setSelectedLanguage] = useState(currentLanguage);
-  const [assessmentResult, setAssessmentResult] = useState<AssessmentResult | null>(null);
+  const [assessmentResult, setAssessmentResult] = useState<VoiceEvaluationResult | null>(null);
   const [isAssessing, setIsAssessing] = useState(false);
   const [studentName, setStudentName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -128,6 +120,7 @@ const VoiceAssessment: React.FC = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         const audioUrl = URL.createObjectURL(audioBlob);
         setRecordedAudio(audioUrl);
+        setRecordedBlob(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -162,13 +155,14 @@ const VoiceAssessment: React.FC = () => {
 
   const resetRecording = () => {
     setRecordedAudio(null);
+    setRecordedBlob(null);
     setIsPlaying(false);
     setAssessmentResult(null);
     toast.success('Recording reset');
   };
 
   const assessReading = async () => {
-    if (!recordedAudio || !assessmentText) {
+    if (!recordedBlob || !assessmentText) {
       toast.error('Please record audio and enter assessment text');
       return;
     }
@@ -176,118 +170,22 @@ const VoiceAssessment: React.FC = () => {
     setIsAssessing(true);
     
     try {
-      const response = await fetch(recordedAudio);
-      const audioBlob = await response.blob();
-      const reader = new FileReader();
+      const result = await AIService.evaluateVoiceReading({
+        audioBlob: recordedBlob,
+        expectedText: assessmentText,
+        language: selectedLanguage,
+        grade: selectedGrade,
+        studentName: studentName || undefined
+      });
       
-      reader.onloadend = async () => {
-        const base64Audio = reader.result as string;
-        const audioContent = base64Audio.split(',')[1];
-        
-        try {
-          const languageCode = languages.find(lang => lang.value === selectedLanguage)?.code || 'en-IN';
-          
-          const recognizedText = await AIService.recognizeSpeech({
-            audioContent,
-            languageCode
-          });
-          
-          const mockResult: AssessmentResult = generateAssessmentResult(recognizedText, assessmentText);
-          
-          setAssessmentResult(mockResult);
-          toast.success('Assessment completed!');
-        } catch (error) {
-          console.error('Error in speech recognition:', error);
-          const mockResult: AssessmentResult = generateMockAssessment();
-          setAssessmentResult(mockResult);
-          toast.success('Assessment completed (offline mode)!');
-        }
-      };
-      
-      reader.readAsDataURL(audioBlob);
+      setAssessmentResult(result);
+      toast.success('Assessment completed!');
     } catch (error) {
       console.error('Error processing audio:', error);
-      const mockResult: AssessmentResult = generateMockAssessment();
-      setAssessmentResult(mockResult);
-      toast.success('Assessment completed (offline mode)!');
+      toast.error('Failed to assess reading. Please try again.');
     } finally {
       setIsAssessing(false);
     }
-  };
-
-  const generateAssessmentResult = (recognizedText: string, expectedText: string): AssessmentResult => {
-    const recognizedWords = recognizedText.toLowerCase().split(' ');
-    const expectedWords = expectedText.toLowerCase().split(' ');
-    
-    const matchingWords = recognizedWords.filter(word => expectedWords.includes(word));
-    const accuracy = Math.round((matchingWords.length / expectedWords.length) * 100);
-    
-    const fluency = Math.max(60, Math.min(100, accuracy + Math.random() * 20 - 10));
-    const pronunciation = Math.max(60, Math.min(100, accuracy + Math.random() * 15 - 7));
-    const overallScore = Math.round((accuracy + fluency + pronunciation) / 3);
-    
-    let feedback = '';
-    let improvementAreas: string[] = [];
-    let strengths: string[] = [];
-    
-    if (overallScore >= 90) {
-      feedback = 'Excellent reading! Your pronunciation and fluency are outstanding.';
-      strengths = ['Clear pronunciation', 'Good fluency', 'Confident reading'];
-    } else if (overallScore >= 75) {
-      feedback = 'Good reading! Focus on pronunciation of difficult words.';
-      strengths = ['Good effort', 'Clear voice'];
-      improvementAreas = ['Pronunciation of complex words', 'Reading speed'];
-    } else {
-      feedback = 'Keep practicing! Try reading slowly and clearly.';
-      improvementAreas = ['Pronunciation', 'Reading speed', 'Confidence'];
-      strengths = ['Good attempt', 'Shows effort'];
-    }
-    
-    return {
-      accuracy,
-      fluency,
-      pronunciation,
-      overallScore,
-      feedback,
-      detailedAnalysis: `Based on the reading assessment, the student demonstrated ${overallScore >= 80 ? 'strong' : overallScore >= 60 ? 'moderate' : 'developing'} reading skills.`,
-      improvementAreas,
-      strengths
-    };
-  };
-
-  const generateMockAssessment = (): AssessmentResult => {
-    const accuracy = Math.floor(Math.random() * 20) + 80;
-    const fluency = Math.floor(Math.random() * 25) + 75;
-    const pronunciation = Math.floor(Math.random() * 30) + 70;
-    const overallScore = Math.round((accuracy + fluency + pronunciation) / 3);
-    
-    let feedback = '';
-    let improvementAreas: string[] = [];
-    let strengths: string[] = [];
-    
-    if (overallScore >= 90) {
-      feedback = 'Excellent reading! Your pronunciation and fluency are very good. Keep up the great work!';
-      strengths = ['Clear pronunciation', 'Good fluency', 'Confident reading'];
-    } else if (overallScore >= 75) {
-      feedback = 'Good reading! Focus on pronunciation of difficult words. Practice reading aloud daily.';
-      strengths = ['Good effort', 'Clear voice'];
-      improvementAreas = ['Pronunciation of complex words', 'Reading speed'];
-    } else {
-      feedback = 'Keep practicing! Try reading slowly and clearly. Focus on each word pronunciation.';
-      improvementAreas = ['Pronunciation', 'Reading speed', 'Confidence'];
-      strengths = ['Good attempt', 'Shows effort'];
-    }
-    
-    return {
-      accuracy,
-      fluency,
-      pronunciation,
-      overallScore,
-      feedback,
-      detailedAnalysis: `Based on the reading assessment, the student demonstrated ${overallScore >= 80 ? 'strong' : overallScore >= 60 ? 'moderate' : 'developing'} reading skills. Regular practice will help improve performance.`,
-      improvementAreas,
-      strengths
-    };
   };
 
   const saveAssessment = async () => {
@@ -310,8 +208,7 @@ const VoiceAssessment: React.FC = () => {
         grade: selectedGrade,
         language: selectedLanguage,
         teacherId: user.uid,
-        metadata: { studentName, assessmentType: 'voice-reading' },
-        createdAt: new Date()
+        metadata: { studentName, assessmentType: 'voice-reading' }
       });
       toast.success('Assessment saved successfully!');
     } catch (error) {
@@ -362,7 +259,7 @@ const VoiceAssessment: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
               AI Voice Assessment
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">Assess students reading skills with AI-powered voice analysis</p>
+            <p className="text-gray-600 text-sm md:text-base">Assess students' reading skills with AI-powered voice analysis</p>
           </div>
         </div>
       </motion.div>
@@ -640,6 +537,13 @@ const VoiceAssessment: React.FC = () => {
                 </h3>
                 <p className="text-gray-700 leading-relaxed mb-2 text-sm">{assessmentResult.feedback}</p>
                 <p className="text-gray-600 text-xs">{assessmentResult.detailedAnalysis}</p>
+                
+                {assessmentResult.transcript && (
+                  <div className="mt-3 p-3 bg-white rounded-lg border border-red-200">
+                    <h4 className="text-xs font-medium text-red-800 mb-1">Recognized Text:</h4>
+                    <p className="text-xs text-gray-700 italic">"{assessmentResult.transcript}"</p>
+                  </div>
+                )}
               </motion.div>
 
               {assessmentResult.strengths && assessmentResult.strengths.length > 0 && (

@@ -45,9 +45,47 @@ export interface Student {
   rollNumber: string;
   teacherId: string;
   subjects: string[];
+  marks?: Record<string, { score: number; maxScore: number; date: Date; subject: string }[]>;
+  attendance?: Record<string, boolean>; // date -> present/absent
   createdAt: Date;
   lastAssessment?: Date;
   performance?: Record<string, number>;
+}
+
+export interface StudentMark {
+  id: string;
+  studentId: string;
+  teacherId: string;
+  subject: string;
+  testName: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  date: Date;
+  remarks?: string;
+}
+
+export interface GeneratedImage {
+  id: string;
+  prompt: string;
+  imageBase64: string;
+  style: string;
+  aspectRatio: string;
+  subject?: string;
+  grade?: string;
+  teacherId: string;
+  createdAt: Date;
+  tags?: string[];
+}
+
+export interface UserData {
+  teacherId: string;
+  generatedContent: GeneratedContent[];
+  images: GeneratedImage[];
+  students: Student[];
+  lessonPlans: LessonPlan[];
+  assessments: Assessment[];
+  marks: StudentMark[];
 }
 
 export interface GeneratedContent {
@@ -484,14 +522,196 @@ export class FirebaseService {
     }
   }
 
+  // Student Marks Management
+  static async addStudentMark(mark: Omit<StudentMark, 'id'>): Promise<string> {
+    try {
+      const docRef = await addDoc(collection(db, 'student_marks'), {
+        ...mark,
+        createdAt: serverTimestamp(),
+        percentage: Math.round((mark.score / mark.maxScore) * 100)
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error adding student mark:', error);
+      const offlineMark = {
+        ...mark,
+        id: Date.now().toString(),
+        createdAt: new Date(),
+        percentage: Math.round((mark.score / mark.maxScore) * 100)
+      };
+      this.saveToLocalStorage('offline_marks', offlineMark);
+      return offlineMark.id;
+    }
+  }
+
+  static async getStudentMarks(teacherId: string, studentId?: string): Promise<StudentMark[]> {
+    try {
+      let q = query(
+        collection(db, 'student_marks'),
+        where('teacherId', '==', teacherId),
+        orderBy('date', 'desc')
+      );
+
+      if (studentId) {
+        q = query(
+          collection(db, 'student_marks'),
+          where('teacherId', '==', teacherId),
+          where('studentId', '==', studentId),
+          orderBy('date', 'desc')
+        );
+      }
+
+      const snapshot = await getDocs(q);
+      const marks = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          date: data.date?.toDate() || new Date(),
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as StudentMark;
+      });
+
+      const offlineMarks = this.getFromLocalStorage('offline_marks') || [];
+      return [...marks, ...offlineMarks];
+    } catch (error) {
+      console.error('Error fetching student marks:', error);
+      return this.getFromLocalStorage('offline_marks') || [];
+    }
+  }
+
+  static async updateStudentMark(markId: string, updates: Partial<StudentMark>): Promise<void> {
+    try {
+      const updateData = { ...updates };
+      if (updates.score && updates.maxScore) {
+        updateData.percentage = Math.round((updates.score / updates.maxScore) * 100);
+      }
+      
+      await updateDoc(doc(db, 'student_marks', markId), {
+        ...updateData,
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Error updating student mark:', error);
+      this.saveToLocalStorage('pending_updates', {
+        type: 'student_mark',
+        id: markId,
+        updates
+      });
+    }
+  }
+
+  static async deleteStudentMark(markId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'student_marks', markId));
+    } catch (error) {
+      console.error('Error deleting student mark:', error);
+      this.saveToLocalStorage('pending_deletions', { type: 'student_mark', id: markId });
+    }
+  }
+
+  // Generated Images Management
+  static async saveGeneratedImage(image: Omit<GeneratedImage, 'id'>): Promise<string> {
+    try {
+      const docRef = await addDoc(collection(db, 'generated_images'), {
+        ...image,
+        createdAt: serverTimestamp(),
+        tags: image.tags || []
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error('Error saving generated image:', error);
+      const offlineImage = {
+        ...image,
+        id: Date.now().toString(),
+        createdAt: new Date()
+      };
+      this.saveToLocalStorage('offline_images', offlineImage);
+      return offlineImage.id;
+    }
+  }
+
+  static async getGeneratedImages(teacherId: string): Promise<GeneratedImage[]> {
+    try {
+      const q = query(
+        collection(db, 'generated_images'),
+        where('teacherId', '==', teacherId),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      );
+
+      const snapshot = await getDocs(q);
+      const images = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: data.createdAt?.toDate() || new Date()
+        } as GeneratedImage;
+      });
+
+      const offlineImages = this.getFromLocalStorage('offline_images') || [];
+      return [...images, ...offlineImages];
+    } catch (error) {
+      console.error('Error fetching generated images:', error);
+      return this.getFromLocalStorage('offline_images') || [];
+    }
+  }
+
+  static async deleteGeneratedImage(imageId: string): Promise<void> {
+    try {
+      await deleteDoc(doc(db, 'generated_images', imageId));
+    } catch (error) {
+      console.error('Error deleting generated image:', error);
+      this.saveToLocalStorage('pending_deletions', { type: 'generated_image', id: imageId });
+    }
+  }
+
+  // Comprehensive User Data
+  static async getUserData(teacherId: string): Promise<UserData> {
+    try {
+      const [content, images, students, lessonPlans, assessments, marks] = await Promise.all([
+        this.getGeneratedContent(teacherId),
+        this.getGeneratedImages(teacherId),
+        this.getStudents(teacherId),
+        this.getLessonPlans(teacherId),
+        this.getAssessments(teacherId),
+        this.getStudentMarks(teacherId)
+      ]);
+
+      return {
+        teacherId,
+        generatedContent: content,
+        images,
+        students,
+        lessonPlans,
+        assessments,
+        marks
+      };
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return {
+        teacherId,
+        generatedContent: [],
+        images: [],
+        students: [],
+        lessonPlans: [],
+        assessments: [],
+        marks: []
+      };
+    }
+  }
+
   // Analytics and Statistics
   static async getTeacherStats(teacherId: string): Promise<Record<string, any>> {
     try {
-      const [content, students, assessments, plans] = await Promise.all([
+      const [content, students, assessments, plans, marks, images] = await Promise.all([
         this.getGeneratedContent(teacherId),
         this.getStudents(teacherId),
         this.getAssessments(teacherId),
-        this.getLessonPlans(teacherId)
+        this.getLessonPlans(teacherId),
+        this.getStudentMarks(teacherId),
+        this.getGeneratedImages(teacherId)
       ]);
 
       return {
@@ -499,6 +719,8 @@ export class FirebaseService {
         totalStudents: students.length,
         totalAssessments: assessments.length,
         totalLessonPlans: plans.length,
+        totalMarks: marks.length,
+        totalImages: images.length,
         contentByType: content.reduce((acc, item) => {
           acc[item.type] = (acc[item.type] || 0) + 1;
           return acc;
@@ -507,6 +729,7 @@ export class FirebaseService {
           acc[student.grade] = (acc[student.grade] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
+        averageMarks: marks.length > 0 ? Math.round(marks.reduce((sum, mark) => sum + mark.percentage, 0) / marks.length) : 0,
         recentActivity: content.slice(0, 5).map(item => ({
           type: item.type,
           title: item.title,
@@ -572,6 +795,8 @@ export class FirebaseService {
       const offlineStudents = this.getFromLocalStorage('offline_students');
       const offlinePlans = this.getFromLocalStorage('offline_lesson_plans');
       const offlineAssessments = this.getFromLocalStorage('offline_assessments');
+      const offlineMarks = this.getFromLocalStorage('offline_marks');
+      const offlineImages = this.getFromLocalStorage('offline_images');
       const pendingUpdates = this.getFromLocalStorage('pending_updates');
       const pendingDeletions = this.getFromLocalStorage('pending_deletions');
 
@@ -627,12 +852,41 @@ export class FirebaseService {
         }
       }
 
+      // Sync marks
+      for (const mark of offlineMarks) {
+        try {
+          const { id, ...markData } = mark;
+          await addDoc(collection(db, 'student_marks'), {
+            ...markData,
+            createdAt: serverTimestamp()
+          });
+        } catch (error) {
+          console.error('Failed to sync mark:', error);
+        }
+      }
+
+      // Sync images
+      for (const image of offlineImages) {
+        try {
+          const { id, ...imageData } = image;
+          await addDoc(collection(db, 'generated_images'), {
+            ...imageData,
+            createdAt: serverTimestamp()
+          });
+        } catch (error) {
+          console.error('Failed to sync image:', error);
+        }
+      }
+
       // Process pending updates
       for (const update of pendingUpdates) {
         try {
           const { type, id, updates } = update;
-          const collectionName = type === 'student' ? 'students' : 
-                                type === 'lesson_plan' ? 'lesson_plans' : 'generated_content';
+          let collectionName = 'generated_content';
+          if (type === 'student') collectionName = 'students';
+          else if (type === 'lesson_plan') collectionName = 'lesson_plans';
+          else if (type === 'student_mark') collectionName = 'student_marks';
+          
           await updateDoc(doc(db, collectionName, id), {
             ...updates,
             updatedAt: serverTimestamp()
@@ -646,8 +900,13 @@ export class FirebaseService {
       for (const deletion of pendingDeletions) {
         try {
           const { type, id } = deletion;
-          const collectionName = type === 'student' ? 'students' : 
-                                type === 'content' ? 'generated_content' : 'lesson_plans';
+          let collectionName = 'generated_content';
+          if (type === 'student') collectionName = 'students';
+          else if (type === 'content') collectionName = 'generated_content';
+          else if (type === 'lesson_plan') collectionName = 'lesson_plans';
+          else if (type === 'student_mark') collectionName = 'student_marks';
+          else if (type === 'generated_image') collectionName = 'generated_images';
+          
           await deleteDoc(doc(db, collectionName, id));
         } catch (error) {
           console.error('Failed to process pending deletion:', error);
@@ -659,6 +918,8 @@ export class FirebaseService {
       this.clearLocalStorage('offline_students');
       this.clearLocalStorage('offline_lesson_plans');
       this.clearLocalStorage('offline_assessments');
+      this.clearLocalStorage('offline_marks');
+      this.clearLocalStorage('offline_images');
       this.clearLocalStorage('pending_updates');
       this.clearLocalStorage('pending_deletions');
 

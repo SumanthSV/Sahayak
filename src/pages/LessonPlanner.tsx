@@ -13,12 +13,17 @@ import {
   CheckCircle,
   Circle,
   Users,
-  FileText
+  FileText,
+  Sparkles,
+  X,
+  Award,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../contexts/LanguageContext';
 import { FirebaseService, LessonPlan } from '../services/firebaseService';
 import { format, startOfWeek, addDays, isSameWeek } from 'date-fns';
+import { AIService } from '../services/aiService';
 import toast from 'react-hot-toast';
 
 const LessonPlanner: React.FC = () => {
@@ -32,6 +37,9 @@ const LessonPlanner: React.FC = () => {
   const [editingPlan, setEditingPlan] = useState<LessonPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any>(null);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -151,11 +159,43 @@ const LessonPlanner: React.FC = () => {
 
       await loadLessonPlans();
       resetForm();
+      
+      // Generate suggestions for the saved plan
+      if (!editingPlan) {
+        generateSuggestions({
+          title: formData.title,
+          subject: formData.subject,
+          grade: formData.grade,
+          objectives: formData.objectives.filter(obj => obj.trim()),
+          activities: formData.activities.filter(act => act.trim())
+        });
+      }
     } catch (error) {
       console.error('Error saving lesson plan:', error);
       toast.error('Error saving lesson plan. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const generateSuggestions = async (planData: {
+    title: string;
+    subject: string;
+    grade: string;
+    objectives: string[];
+    activities: string[];
+  }) => {
+    setIsGeneratingSuggestions(true);
+    try {
+      const result = await AIService.generateLessonSuggestions(planData);
+      setSuggestions(result);
+      setShowSuggestions(true);
+      toast.success('AI suggestions generated!');
+    } catch (error) {
+      console.error('Error generating suggestions:', error);
+      toast.error('Failed to generate suggestions');
+    } finally {
+      setIsGeneratingSuggestions(false);
     }
   };
 
@@ -614,9 +654,143 @@ const LessonPlanner: React.FC = () => {
                   </>
                 )}
               </motion.button>
+              
+              {!editingPlan && formData.title.trim() && (
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => generateSuggestions({
+                    title: formData.title,
+                    subject: formData.subject,
+                    grade: formData.grade,
+                    objectives: formData.objectives.filter(obj => obj.trim()),
+                    activities: formData.activities.filter(act => act.trim())
+                  })}
+                  disabled={isGeneratingSuggestions}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center justify-center space-x-2 mt-3"
+                >
+                  {isGeneratingSuggestions ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Generating Suggestions...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      <span>Get AI Suggestions</span>
+                    </>
+                  )}
+                </motion.button>
+              )}
             </div>
           </div>
         </motion.div>
+      )}
+
+      {/* AI Suggestions Modal */}
+      {showSuggestions && suggestions && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 flex items-center">
+                <Sparkles className="w-5 h-5 text-indigo-600 mr-2" />
+                AI Lesson Suggestions
+              </h2>
+              <button
+                onClick={() => setShowSuggestions(false)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto space-y-6">
+              {/* Improvements */}
+              <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                <h3 className="font-semibold text-blue-800 mb-3 flex items-center">
+                  <Target className="w-4 h-4 mr-2" />
+                  Suggested Improvements
+                </h3>
+                <ul className="space-y-2">
+                  {suggestions.improvements.map((improvement: string, index: number) => (
+                    <li key={index} className="text-blue-700 text-sm flex items-start">
+                      <span className="text-blue-500 mr-2">•</span>
+                      {improvement}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Additional Activities */}
+              <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                <h3 className="font-semibold text-green-800 mb-3 flex items-center">
+                  <Activity className="w-4 h-4 mr-2" />
+                  Additional Activities
+                </h3>
+                <ul className="space-y-2">
+                  {suggestions.additionalActivities.map((activity: string, index: number) => (
+                    <li key={index} className="text-green-700 text-sm flex items-start">
+                      <span className="text-green-500 mr-2">•</span>
+                      {activity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                <h3 className="font-semibold text-purple-800 mb-3 flex items-center">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Recommended Resources
+                </h3>
+                <ul className="space-y-2">
+                  {suggestions.resources.map((resource: string, index: number) => (
+                    <li key={index} className="text-purple-700 text-sm flex items-start">
+                      <span className="text-purple-500 mr-2">•</span>
+                      {resource}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Assessment Ideas */}
+              <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
+                <h3 className="font-semibold text-orange-800 mb-3 flex items-center">
+                  <Award className="w-4 h-4 mr-2" />
+                  Assessment Ideas
+                </h3>
+                <ul className="space-y-2">
+                  {suggestions.assessmentIdeas.map((idea: string, index: number) => (
+                    <li key={index} className="text-orange-700 text-sm flex items-start">
+                      <span className="text-orange-500 mr-2">•</span>
+                      {idea}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Next Lesson Topics */}
+              <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-200">
+                <h3 className="font-semibold text-indigo-800 mb-3 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Next Lesson Topics
+                </h3>
+                <ul className="space-y-2">
+                  {suggestions.nextLessonTopics.map((topic: string, index: number) => (
+                    <li key={index} className="text-indigo-700 text-sm flex items-start">
+                      <span className="text-indigo-500 mr-2">•</span>
+                      {topic}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* Lesson Plans List */}

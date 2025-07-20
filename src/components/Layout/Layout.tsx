@@ -59,10 +59,10 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Persistent Voice Button */}
-      {/* <VoiceButton 
+      <VoiceButton 
         position="fixed"
         size="lg"
-      /> */}
+      />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WifiOff, Wifi, ChevronDown, ChevronUp, FolderSync as Sync, AlertCircle } from 'lucide-react';
+import { WifiOff, Wifi, ChevronDown, AlertCircle } from 'lucide-react';
 
 interface OfflineIndicatorProps {
   isOnline: boolean;
@@ -15,6 +15,9 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  const shouldShow = !isOnline || syncStatus === 'syncing' || syncStatus === 'error';
+  if (!shouldShow) return null;
+
   const getStatusColor = () => {
     if (!isOnline) return 'from-red-500 to-orange-500';
     if (syncStatus === 'syncing') return 'from-blue-500 to-cyan-500';
@@ -26,7 +29,7 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
     if (!isOnline) return 'Offline Mode';
     if (syncStatus === 'syncing') return 'Syncing...';
     if (syncStatus === 'error') return 'Sync Error';
-    return '🚧 This is a working prototype. Some features are still being polished (as of now recommended only on big screen )';
+    return '';
   };
 
   const getStatusIcon = () => {
@@ -95,15 +98,10 @@ export const OfflineIndicator: React.FC<OfflineIndicatorProps> = ({
                       <p>• Synchronizing offline changes</p>
                       <p>• Please wait for sync to complete</p>
                     </>
-                  ) : syncStatus === 'error' ? (
+                  ) : (
                     <>
                       <p>• Failed to sync some changes</p>
                       <p>• Will retry automatically</p>
-                    </>
-                  ) : (
-                    <>
-                      {/* <p>• All features available</p> */}
-                      <p>• Teqch is under active development - updates and improvements are ongoing.</p>
                     </>
                   )}
                 </div>

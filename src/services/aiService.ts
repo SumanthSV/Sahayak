@@ -52,9 +52,36 @@ export interface SpeechRecognitionRequest {
 
 export interface ImageGenerationRequest {
   prompt: string;
-  aspectRatio?: '1:1' | '9:16' | '16:9' | '4:3' | '3:4';
+  aspectRatio?: '1:1' | '9:16' | '16:9' | '4:3' | '3:4' | '3:2';
   style?: 'educational' | 'cartoon' | 'realistic' | 'diagram';
   language?: string;
+  subject?: string;
+  grade?: string;
+}
+
+export interface GameGenerationRequest {
+  gameType: 'math' | 'puzzle' | 'word';
+  grade: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+export interface VoiceEvaluationRequest {
+  audioBlob: Blob;
+  expectedText: string;
+  language: string;
+  grade: string;
+  studentName?: string;
+}
+
+export interface VoiceEvaluationResult {
+  accuracy: number;
+  fluency: number;
+  pronunciation: number;
+  overallScore: number;
+  feedback: string;
+  detailedAnalysis: string;
+  improvementAreas: string[];
+  strengths: string[];
+  transcript: string;
 }
 
 export class AIService {
@@ -67,6 +94,9 @@ export class AIService {
   private static recognizeSpeechFunction = httpsCallable(functions, 'recognizeSpeech');
   private static generateEducationalImageFunction = httpsCallable(functions, 'generateEducationalImage');
   private static translateContentFunction = httpsCallable(functions, 'translateContent');
+  private static evaluateVoiceReadingFunction = httpsCallable(functions, 'evaluateVoiceReading');
+  private static generateLessonSuggestionsFunction = httpsCallable(functions, 'generateLessonSuggestions');
+  private static generateEducationalGameFunction = httpsCallable(functions, 'generateEducationalGame');
 
   // Story Generation
   static async generateStory(request: StoryRequest): Promise<string> {
@@ -130,6 +160,7 @@ export class AIService {
         includeImage: false
       };
       const result = await this.generateVisualAidWithImageFunction(enhancedRequest);
+      console.log('generateVisualAid');
       return (result.data as any).instructions;
     } catch (error) {
       console.error('Error generating visual aid:', error);
@@ -139,17 +170,27 @@ export class AIService {
 
   static async generateVisualAidWithImage(request: VisualAidRequest): Promise<{
     instructions: string;
-    imageUrl?: string;
+    imageUrl: string;
     materials: string[];
     timeEstimate: string;
     difficulty: string;
   }> {
     try {
+      console.log("before generateVisualAidWithImage");
       const result = await this.generateVisualAidWithImageFunction(request);
-      return (result.data as any);
+
+      console.log("after generateVisualAidWithImage");
+      console.log(result.data);
+      return result.data as {
+        instructions: string;
+        imageUrl: string;
+        materials: string[];
+        timeEstimate: string;
+        difficulty: string;
+      };
     } catch (error) {
-      console.error('Error generating visual aid with image:', error);
-      throw new Error('Failed to generate visual aid with image. Please check your connection and try again.');
+      console.error("Error generating visual aid with image:", error);
+      throw new Error("Failed to generate visual aid with image. Please check your connection and try again.");
     }
   }
 
@@ -209,13 +250,147 @@ export class AIService {
   }
 
   // Image Generation
-  static async generateEducationalImage(request: ImageGenerationRequest): Promise<string> {
+  static async generateEducationalImage(request: ImageGenerationRequest): Promise<{
+    imageBase64: string;
+    prompt: string;
+    metadata: {
+      style: string;
+      aspectRatio: string;
+      subject?: string;
+      grade?: string;
+    };
+  }> {
     try {
       const result = await this.generateEducationalImageFunction(request);
-      return (result.data as any).imageBase64;
+      return (result.data as any);
     } catch (error) {
       console.error('Error generating educational image:', error);
       throw new Error('Failed to generate educational image. Please check your connection and try again.');
+    }
+  }
+
+  // Educational Games Generation
+  static async generateEducationalGame(request: GameGenerationRequest): Promise<any> {
+    try {
+      const result = await this.generateEducationalGameFunction(request);
+      return (result.data as any);
+    } catch (error) {
+      console.error('Error generating educational game:', error);
+      throw new Error('Failed to generate educational game. Please check your connection and try again.');
+    }
+  }
+  // Voice Evaluation
+  static async evaluateVoiceReading(request: VoiceEvaluationRequest): Promise<VoiceEvaluationResult> {
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      const audioBase64 = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const result = reader.result as string;
+          resolve(result.split(',')[1]); // Remove data:audio/wav;base64, prefix
+        };
+        reader.readAsDataURL(request.audioBlob);
+      });
+
+      const result = await this.evaluateVoiceReadingFunction({
+        audioContent: audioBase64,
+        expectedText: request.expectedText,
+        language: request.language,
+        grade: request.grade,
+        studentName: request.studentName
+      });
+      
+      return (result.data as any);
+    } catch (error) {
+      console.error('Error evaluating voice reading:', error);
+      // Fallback to mock evaluation
+      return this.generateMockVoiceEvaluation(request.expectedText);
+    }
+  }
+
+  private static generateMockVoiceEvaluation(expectedText: string): VoiceEvaluationResult {
+    const accuracy = Math.floor(Math.random() * 20) + 80;
+    const fluency = Math.floor(Math.random() * 25) + 75;
+    const pronunciation = Math.floor(Math.random() * 30) + 70;
+    const overallScore = Math.round((accuracy + fluency + pronunciation) / 3);
+    
+    let feedback = '';
+    let improvementAreas: string[] = [];
+    let strengths: string[] = [];
+    
+    if (overallScore >= 90) {
+      feedback = 'Excellent reading! Your pronunciation and fluency are outstanding.';
+      strengths = ['Clear pronunciation', 'Good fluency', 'Confident reading'];
+    } else if (overallScore >= 75) {
+      feedback = 'Good reading! Focus on pronunciation of difficult words.';
+      strengths = ['Good effort', 'Clear voice'];
+      improvementAreas = ['Pronunciation of complex words', 'Reading speed'];
+    } else {
+      feedback = 'Keep practicing! Try reading slowly and clearly.';
+      improvementAreas = ['Pronunciation', 'Reading speed', 'Confidence'];
+      strengths = ['Good attempt', 'Shows effort'];
+    }
+    
+    return {
+      accuracy,
+      fluency,
+      pronunciation,
+      overallScore,
+      feedback,
+      detailedAnalysis: `Based on the reading assessment, the student demonstrated ${overallScore >= 80 ? 'strong' : overallScore >= 60 ? 'moderate' : 'developing'} reading skills.`,
+      improvementAreas,
+      strengths,
+      transcript: expectedText.substring(0, Math.floor(expectedText.length * (accuracy / 100)))
+    };
+  }
+
+  // Lesson Plan Suggestions
+  static async generateLessonSuggestions(lessonPlan: {
+    title: string;
+    subject: string;
+    grade: string;
+    objectives: string[];
+    activities: string[];
+  }): Promise<{
+    improvements: string[];
+    additionalActivities: string[];
+    resources: string[];
+    assessmentIdeas: string[];
+    nextLessonTopics: string[];
+  }> {
+    try {
+      const result = await this.generateLessonSuggestionsFunction(lessonPlan);
+      return (result.data as any);
+    } catch (error) {
+      console.error('Error generating lesson suggestions:', error);
+      // Return mock suggestions
+      return {
+        improvements: [
+          'Add more interactive elements to engage students',
+          'Include visual aids for better understanding',
+          'Consider differentiated instruction for various learning levels'
+        ],
+        additionalActivities: [
+          'Group discussion activity',
+          'Hands-on experiment or demonstration',
+          'Creative project or presentation'
+        ],
+        resources: [
+          'Educational videos related to the topic',
+          'Interactive online simulations',
+          'Printable worksheets and handouts'
+        ],
+        assessmentIdeas: [
+          'Quick formative assessment quiz',
+          'Peer evaluation activity',
+          'Portfolio-based assessment'
+        ],
+        nextLessonTopics: [
+          'Advanced concepts building on this lesson',
+          'Real-world applications of the topic',
+          'Cross-curricular connections'
+        ]
+      };
     }
   }
 

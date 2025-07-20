@@ -47,6 +47,12 @@ const resources = {
       grade3: 'Grade 3',
       grade4: 'Grade 4',
       grade5: 'Grade 5',
+      
+      // Games
+      games: 'Educational Games',
+      mathChallenge: 'Math Challenge',
+      brainPuzzles: 'Brain Puzzles',
+      wordMaster: 'Word Master',
     }
   },
   hi: {
@@ -93,6 +99,12 @@ const resources = {
       grade3: 'कक्षा 3',
       grade4: 'कक्षा 4',
       grade5: 'कक्षा 5',
+      
+      // Games
+      games: 'शैक्षिक खेल',
+      mathChallenge: 'गणित चुनौती',
+      brainPuzzles: 'दिमागी पहेलियाँ',
+      wordMaster: 'शब्द मास्टर',
     }
   },
   kn: {
@@ -139,6 +151,12 @@ const resources = {
       grade3: 'ತರಗತಿ 3',
       grade4: 'ತರಗತಿ 4',
       grade5: 'ತರಗತಿ 5',
+      
+      // Games
+      games: 'ಶೈಕ್ಷಣಿಕ ಆಟಗಳು',
+      mathChallenge: 'ಗಣಿತ ಸವಾಲು',
+      brainPuzzles: 'ಮೆದುಳಿನ ಒಗಟುಗಳು',
+      wordMaster: 'ಪದ ಮಾಸ್ಟರ್',
     }
   },
   mr: {
@@ -185,6 +203,12 @@ const resources = {
       grade3: 'इयत्ता 3',
       grade4: 'इयत्ता 4',
       grade5: 'इयत्ता 5',
+      
+      // Games
+      games: 'शैक्षणिक खेळ',
+      mathChallenge: 'गणित आव्हान',
+      brainPuzzles: 'मेंदूची कोडी',
+      wordMaster: 'शब्द मास्टर',
     }
   }
 };

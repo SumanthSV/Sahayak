@@ -5,7 +5,7 @@ import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'react-hot-toast';
 import App from './App.tsx';
 import i18n from './config/i18n';
-import './index.css';
+import './index.css'; // Initialize pdfMake configuration
 
 // Service Worker registration for offline support
 if ('serviceWorker' in navigator) {

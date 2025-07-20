@@ -14,11 +14,12 @@ import {
   Download,
   BarChart3,
   User,
-  GraduationCap
+  GraduationCap,
+  X
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../contexts/LanguageContext';
-import { FirebaseService, Student } from '../services/firebaseService';
+import { FirebaseService, Student, StudentMark } from '../services/firebaseService';
 import toast from 'react-hot-toast';
 
 interface StudentProgress {
@@ -53,6 +54,17 @@ const StudentTracker: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [classStats, setClassStats] = useState<ClassStats | null>(null);
+  const [showMarksModal, setShowMarksModal] = useState(false);
+  const [selectedStudentForMarks, setSelectedStudentForMarks] = useState<Student | null>(null);
+  const [studentMarks, setStudentMarks] = useState<StudentMark[]>([]);
+  const [isAddingMark, setIsAddingMark] = useState(false);
+  const [markForm, setMarkForm] = useState({
+    subject: 'Mathematics',
+    testName: '',
+    score: '',
+    maxScore: '100',
+    remarks: ''
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -231,6 +243,60 @@ const StudentTracker: React.FC = () => {
       toast.error('Error saving student. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleAddMarks = async (student: Student) => {
+    setSelectedStudentForMarks(student);
+    setShowMarksModal(true);
+    
+    // Load student marks
+    try {
+      const marks = await FirebaseService.getStudentMarks(user!.uid, student.id);
+      setStudentMarks(marks);
+    } catch (error) {
+      console.error('Error loading student marks:', error);
+      toast.error('Error loading student marks');
+    }
+  };
+
+  const handleSaveMark = async () => {
+    if (!selectedStudentForMarks || !user || !markForm.testName || !markForm.score) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      await FirebaseService.addStudentMark({
+        studentId: selectedStudentForMarks.id,
+        teacherId: user.uid,
+        subject: markForm.subject,
+        testName: markForm.testName,
+        score: parseInt(markForm.score),
+        maxScore: parseInt(markForm.maxScore),
+        percentage: Math.round((parseInt(markForm.score) / parseInt(markForm.maxScore)) * 100),
+        date: new Date(),
+        remarks: markForm.remarks || undefined
+      });
+
+      // Reload marks
+      const marks = await FirebaseService.getStudentMarks(user.uid, selectedStudentForMarks.id);
+      setStudentMarks(marks);
+      
+      // Reset form
+      setMarkForm({
+        subject: 'Mathematics',
+        testName: '',
+        score: '',
+        maxScore: '100',
+        remarks: ''
+      });
+      setIsAddingMark(false);
+      
+      toast.success('Mark added successfully!');
+    } catch (error) {
+      console.error('Error saving mark:', error);
+      toast.error('Error saving mark. Please try again.');
     }
   };
 
@@ -700,14 +766,25 @@ const StudentTracker: React.FC = () => {
                         whileTap={{ scale: 0.9 }}
                         onClick={() => startEditing(student)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                        title="Edit Student"
                       >
                         <Edit3 className="w-4 h-4" />
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
+                        onClick={() => handleAddMarks(student)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200"
+                        title="Add Marks"
+                      >
+                        <Award className="w-4 h-4" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={() => handleDeleteStudent(student.id)}
                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                        title="Delete Student"
                       >
                         <Trash2 className="w-4 h-4" />
                       </motion.button>
@@ -759,6 +836,180 @@ const StudentTracker: React.FC = () => {
           </div>
         )}
       </motion.div>
+
+      {/* Marks Modal */}
+      {showMarksModal && selectedStudentForMarks && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+          >
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Marks for {selectedStudentForMarks.name}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowMarksModal(false);
+                  setSelectedStudentForMarks(null);
+                  setIsAddingMark(false);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto">
+              {/* Add Mark Form */}
+              {isAddingMark ? (
+                <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                  <h3 className="font-semibold text-gray-800 mb-4">Add New Mark</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Subject
+                      </label>
+                      <select
+                        value={markForm.subject}
+                        onChange={(e) => setMarkForm(prev => ({ ...prev, subject: e.target.value }))}
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      >
+                        {subjects.map((subject) => (
+                          <option key={subject} value={subject}>{subject}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Test/Assignment Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={markForm.testName}
+                        onChange={(e) => setMarkForm(prev => ({ ...prev, testName: e.target.value }))}
+                        placeholder="e.g., Unit Test 1, Quiz 2"
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Score Obtained *
+                      </label>
+                      <input
+                        type="number"
+                        value={markForm.score}
+                        onChange={(e) => setMarkForm(prev => ({ ...prev, score: e.target.value }))}
+                        placeholder="85"
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Maximum Score
+                      </label>
+                      <input
+                        type="number"
+                        value={markForm.maxScore}
+                        onChange={(e) => setMarkForm(prev => ({ ...prev, maxScore: e.target.value }))}
+                        placeholder="100"
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Remarks (Optional)
+                      </label>
+                      <textarea
+                        value={markForm.remarks}
+                        onChange={(e) => setMarkForm(prev => ({ ...prev, remarks: e.target.value }))}
+                        placeholder="Good performance, needs improvement in..."
+                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent h-20 resize-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-3 mt-4">
+                    <button
+                      onClick={() => setIsAddingMark(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSaveMark}
+                      className="px-6 py-2 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-all duration-200"
+                    >
+                      Save Mark
+                    </motion.button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-6">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setIsAddingMark(true)}
+                    className="bg-teal-500 text-white px-4 py-2 rounded-xl hover:bg-teal-600 transition-all duration-200 flex items-center space-x-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add New Mark</span>
+                  </motion.button>
+                </div>
+              )}
+
+              {/* Marks List */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-gray-800">Previous Marks</h3>
+                {studentMarks.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Award className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p>No marks recorded yet</p>
+                    <p className="text-sm mt-2">Click "Add New Mark" to get started</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-4">
+                    {studentMarks.map((mark) => (
+                      <div key={mark.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-medium text-gray-800">{mark.testName}</h4>
+                            <p className="text-sm text-gray-600">{mark.subject}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-teal-600">
+                              {mark.score}/{mark.maxScore}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {mark.percentage}%
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span>{mark.date.toLocaleDateString()}</span>
+                          {mark.remarks && (
+                            <span className="italic">"{mark.remarks}"</span>
+                          )}
+                        </div>
+                        <div className="mt-2">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-teal-500 h-2 rounded-full transition-all duration-500"
+                              style={{ width: `${mark.percentage}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
