@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { generatePDF } from '../../utils/pdfGenerator';
 import html2canvas from 'html2canvas';
+import { AnimatedAvatar } from './AnimatedAvatar';
 import toast from 'react-hot-toast';
 
 interface OutputCardProps {
@@ -24,7 +25,7 @@ interface OutputCardProps {
   content?: string;
   suggestions?: string;
   tips?: string;
-  imageBase64?: string;
+  imageUrl?: string;
   timestamp?: Date;
   type: 'story' | 'worksheet' | 'concept' | 'visual-aid' | 'assessment';
   onSave?: () => void;
@@ -41,7 +42,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
   content,
   suggestions,
   tips,
-  imageBase64,
+  imageUrl,
   timestamp = new Date(),
   type,
   onSave,
@@ -61,7 +62,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     { key: 'content', label: 'Content', icon: FileText, available: !!content },
     { key: 'suggestions', label: 'Suggestions', icon: Lightbulb, available: !!suggestions },
     { key: 'tips', label: 'Tips', icon: MessageSquare, available: !!tips },
-    { key: 'image', label: 'Image', icon: ImageIcon, available: !!imageBase64}
+    { key: 'image', label: 'Image', icon: ImageIcon, available: !!imageUrl }
   ].filter(tab => tab.available);
 
   // Set initial active tab to first available
@@ -87,7 +88,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     switch (activeTab) {
       case 'suggestions': return suggestions || '';
       case 'tips': return tips || '';
-      case 'image': return imageBase64 || '';
+      case 'image': return imageUrl || '';
       default: return content || '';
     }
   };
@@ -98,7 +99,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     if (content) pdfContent += `CONTENT:\n${content}\n\n`;
     if (suggestions) pdfContent += `SUGGESTIONS:\n${suggestions}\n\n`;
     if (tips) pdfContent += `TIPS:\n${tips}\n\n`;
-    if (imageBase64) pdfContent += `IMAGE URL:\n${imageBase64}\n\n`;
+    if (imageUrl) pdfContent += `IMAGE URL:\n${imageUrl}\n\n`;
 
     const language = additionalData?.language || 'en';
     generatePDF(pdfContent, `${type}_${title.replace(/\s+/g, '_')}`, language);
@@ -129,11 +130,11 @@ export const OutputCard: React.FC<OutputCardProps> = ({
   };
 
   const handleDownloadImageOnly = () => {
-    if (!imageBase64) return;
+    if (!imageUrl) return;
 
     const link = document.createElement('a');
     link.download = `${type}_image_${Date.now()}.png`;
-    link.href = imageBase64 || imageUrl;
+    link.href = imageUrl;
     link.target = '_blank';
     link.click();
     
@@ -169,7 +170,12 @@ export const OutputCard: React.FC<OutputCardProps> = ({
       <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 truncate">{title}</h3>
+            <div className="flex items-center space-x-3 mb-2">
+              <AnimatedAvatar type={type} size="md" />
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate">{title}</h3>
+              </div>
+            </div>
             <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
               <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
               <span>{timestamp.toLocaleString()}</span>
@@ -224,7 +230,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               <Camera className="w-4 h-4" />
             </motion.button>
 
-            {imageBase64 && (
+            {imageUrl && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -295,22 +301,6 @@ export const OutputCard: React.FC<OutputCardProps> = ({
             transition={{ duration: 0.2 }}
             className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
           >
-            {activeTab === 'image' && imageBase64 && (
-              <div className="text-center">
-                <img
-                  src={imageBase64}
-                  alt={title}
-                  className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    toast.error('Failed to load image');
-                  }}
-                />
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                  Click the image download button above to save this image
-                </p>
-              </div>
-            )}
             {activeTab === 'content' && content && (
               <div className="bg-slate-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-4 rounded-lg border-2 border-slate-600 dark:border-gray-600 font-mono text-sm leading-relaxed">
                 <pre className="whitespace-pre-wrap">
@@ -343,7 +333,22 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               </div>
             )}
             
-            
+            {activeTab === 'image' && imageUrl && (
+              <div className="text-center">
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    toast.error('Failed to load image');
+                  }}
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Click the image download button above to save this image
+                </p>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
       </div>

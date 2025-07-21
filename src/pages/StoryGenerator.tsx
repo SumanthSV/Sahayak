@@ -163,15 +163,15 @@ const StoryGenerator: React.FC = () => {
           <div className="flex items-center space-x-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center"
             >
-              <BookOpen className="w-8 h-8 text-white" />
+              <BookOpen className="w-6 h-6 text-gray-900 dark:text-white" />
             </motion.div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold dark:text-zinc-200 text-gray-900">
                 {t('storyTitle')}
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg mt-2">{t('storySubtitle')}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">{t('storySubtitle')}</p>
             </div>
           </div>
         </div>
