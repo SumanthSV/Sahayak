@@ -1,3 +1,4 @@
+import { getStorage, uploadString } from "firebase/storage";
 import { 
   collection, 
   doc, 
@@ -6,6 +7,7 @@ import {
   deleteDoc, 
   getDocs, 
   getDoc,
+  setDoc,
   query, 
   where, 
   orderBy, 
@@ -26,14 +28,10 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, auth, storage } from '../config/firebase';
 
+
 export interface Teacher {
-  id: string;
   email: string;
   name: string;
-  school: string;
-  subjects: string[];
-  experience: string;
-  phone?: string;
   createdAt: Date;
   lastLogin?: Date;
 }
@@ -90,7 +88,7 @@ export interface UserData {
 
 export interface GeneratedContent {
   id: string;
-  type: 'story' | 'worksheet' | 'visual-aid' | 'concept-explanation';
+  type: string;
   title: string;
   content: string;
   subject: string;
@@ -99,8 +97,8 @@ export interface GeneratedContent {
   teacherId: string;
   createdAt: Date;
   isOffline?: boolean;
-  tags?: string[];
   metadata?: Record<string, any>;
+  tags?: string[];
 }
 
 export interface LessonPlan {
@@ -132,6 +130,14 @@ export interface Assessment {
 }
 
 export class FirebaseService {
+
+  static uploadImageToStorage = async (base64: string, path: string) => {
+    const imageRef = ref(storage, path);
+    await uploadString(imageRef, base64, 'base64');
+    const url = await getDownloadURL(imageRef);
+    return url;
+  };
+
   // Authentication
   static async signIn(email: string, password: string): Promise<User> {
     const result = await signInWithEmailAndPassword(auth, email, password);
@@ -146,24 +152,31 @@ export class FirebaseService {
 
   static async signUp(email: string, password: string, teacherData: Partial<Teacher>): Promise<User> {
     const result = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = result.user.uid;
     
-    // Update user profile
     await updateProfile(result.user, {
-      displayName: teacherData.name
+      displayName: teacherData.name 
     });
     
-    // Create teacher profile in Firestore
-    await addDoc(collection(db, 'teachers'), {
-      ...teacherData,
+    const userRef = doc(db, "users", uid);
+    const name = teacherData.name;
+    
+    await setDoc(userRef, {
+      uid,
+      name,
       email,
-      createdAt: serverTimestamp(),
-      lastLogin: serverTimestamp()
+      createdAt: serverTimestamp()
     });
     
     return result.user;
   }
 
   static async signOut(): Promise<void> {
+    // Clear user-specific localStorage data
+    const user = auth.currentUser;
+    if (user) {
+      this.clearUserLocalStorage(user.uid);
+    }
     await firebaseSignOut(auth);
   }
 
@@ -219,8 +232,15 @@ export class FirebaseService {
     }
   }
 
-  // Content Management
+  // Content Management with User Scoping
   static async saveGeneratedContent(content: Omit<GeneratedContent, 'id'>): Promise<string> {
+    const user = auth.currentUser;
+    if (!user) throw new Error('User not authenticated');
+
+    // Check if auto-save is enabled
+    const settings = JSON.parse(localStorage.getItem(`settings_${user.uid}`) || '{}');
+    const autoSaveEnabled = settings.autoSaveContent;
+    
     try {
       const docRef = await addDoc(collection(db, 'generated_content'), {
         ...content,
@@ -228,17 +248,35 @@ export class FirebaseService {
         tags: content.tags || [],
         metadata: content.metadata || {}
       });
+      
+      // If auto-save is enabled, also save to user-scoped local storage
+      if (autoSaveEnabled) {
+        const offlineContent = { 
+          ...content, 
+          id: docRef.id, 
+          isOffline: false,
+          createdAt: new Date()
+        };
+        this.saveToUserLocalStorage(user.uid, 'auto_saved_content', offlineContent);
+      }
+      
       return docRef.id;
     } catch (error) {
       console.error('Error saving content:', error);
-      // Save to local storage if offline
+      // Save to user-scoped local storage if offline
       const offlineContent = { 
         ...content, 
         id: Date.now().toString(), 
         isOffline: true,
         createdAt: new Date()
       };
-      this.saveToLocalStorage('offline_content', offlineContent);
+      this.saveToUserLocalStorage(user.uid, 'offline_content', offlineContent);
+      
+      // Also save to auto-save if enabled
+      if (autoSaveEnabled) {
+        this.saveToUserLocalStorage(user.uid, 'auto_saved_content', offlineContent);
+      }
+      
       return offlineContent.id;
     }
   }
@@ -272,13 +310,16 @@ export class FirebaseService {
         } as GeneratedContent;
       });
 
-      // Merge with offline content
-      const offlineContent = this.getFromLocalStorage('offline_content') || [];
-      return [...content, ...offlineContent];
+      // Merge with user-scoped offline content
+      const offlineContent = this.getFromUserLocalStorage(teacherId, 'offline_content') || [];
+      const autoSavedContent = this.getFromUserLocalStorage(teacherId, 'auto_saved_content') || [];
+      return [...content, ...offlineContent, ...autoSavedContent];
     } catch (error) {
       console.error('Error fetching content:', error);
-      // Return offline content if network unavailable
-      return this.getFromLocalStorage('offline_content') || [];
+      // Return user-scoped offline content if network unavailable
+      const offlineContent = this.getFromUserLocalStorage(teacherId, 'offline_content') || [];
+      const autoSavedContent = this.getFromUserLocalStorage(teacherId, 'auto_saved_content') || [];
+      return [...offlineContent, ...autoSavedContent];
     }
   }
 
@@ -287,8 +328,10 @@ export class FirebaseService {
       await deleteDoc(doc(db, 'generated_content', contentId));
     } catch (error) {
       console.error('Error deleting content:', error);
-      // Queue for deletion when online
-      this.saveToLocalStorage('pending_deletions', { type: 'content', id: contentId });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_deletions', { type: 'content', id: contentId });
+      }
     }
   }
 
@@ -303,14 +346,18 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error adding student:', error);
-      const offlineStudent = { 
-        ...student, 
-        id: Date.now().toString(),
-        createdAt: new Date(),
-        performance: {}
-      };
-      this.saveToLocalStorage('offline_students', offlineStudent);
-      return offlineStudent.id;
+      const user = auth.currentUser;
+      if (user) {
+        const offlineStudent = { 
+          ...student, 
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          performance: {}
+        };
+        this.saveToUserLocalStorage(user.uid, 'offline_students', offlineStudent);
+        return offlineStudent.id;
+      }
+      throw error;
     }
   }
 
@@ -332,12 +379,12 @@ export class FirebaseService {
         } as Student;
       });
 
-      // Merge with offline students
-      const offlineStudents = this.getFromLocalStorage('offline_students') || [];
+      // Merge with user-scoped offline students
+      const offlineStudents = this.getFromUserLocalStorage(teacherId, 'offline_students') || [];
       return [...students, ...offlineStudents];
     } catch (error) {
       console.error('Error fetching students:', error);
-      return this.getFromLocalStorage('offline_students') || [];
+      return this.getFromUserLocalStorage(teacherId, 'offline_students') || [];
     }
   }
 
@@ -349,12 +396,14 @@ export class FirebaseService {
       });
     } catch (error) {
       console.error('Error updating student:', error);
-      // Queue update for when online
-      this.saveToLocalStorage('pending_updates', { 
-        type: 'student', 
-        id: studentId, 
-        updates 
-      });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_updates', { 
+          type: 'student', 
+          id: studentId, 
+          updates 
+        });
+      }
     }
   }
 
@@ -379,7 +428,10 @@ export class FirebaseService {
       await batch.commit();
     } catch (error) {
       console.error('Error deleting student:', error);
-      this.saveToLocalStorage('pending_deletions', { type: 'student', id: studentId });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_deletions', { type: 'student', id: studentId });
+      }
     }
   }
 
@@ -399,13 +451,17 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error saving assessment:', error);
-      const offlineAssessment = {
-        ...assessment,
-        id: Date.now().toString(),
-        createdAt: new Date()
-      };
-      this.saveToLocalStorage('offline_assessments', offlineAssessment);
-      return offlineAssessment.id;
+      const user = auth.currentUser;
+      if (user) {
+        const offlineAssessment = {
+          ...assessment,
+          id: Date.now().toString(),
+          createdAt: new Date()
+        };
+        this.saveToUserLocalStorage(user.uid, 'offline_assessments', offlineAssessment);
+        return offlineAssessment.id;
+      }
+      throw error;
     }
   }
 
@@ -437,12 +493,12 @@ export class FirebaseService {
         } as Assessment;
       });
 
-      // Merge with offline assessments
-      const offlineAssessments = this.getFromLocalStorage('offline_assessments') || [];
+      // Merge with user-scoped offline assessments
+      const offlineAssessments = this.getFromUserLocalStorage(teacherId, 'offline_assessments') || [];
       return [...assessments, ...offlineAssessments];
     } catch (error) {
       console.error('Error fetching assessments:', error);
-      return this.getFromLocalStorage('offline_assessments') || [];
+      return this.getFromUserLocalStorage(teacherId, 'offline_assessments') || [];
     }
   }
 
@@ -457,14 +513,18 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error saving lesson plan:', error);
-      const offlinePlan = { 
-        ...plan, 
-        id: Date.now().toString(),
-        createdAt: new Date(),
-        status: plan.status || 'draft'
-      };
-      this.saveToLocalStorage('offline_lesson_plans', offlinePlan);
-      return offlinePlan.id;
+      const user = auth.currentUser;
+      if (user) {
+        const offlinePlan = { 
+          ...plan, 
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          status: plan.status || 'draft'
+        };
+        this.saveToUserLocalStorage(user.uid, 'offline_lesson_plans', offlinePlan);
+        return offlinePlan.id;
+      }
+      throw error;
     }
   }
 
@@ -485,12 +545,12 @@ export class FirebaseService {
         } as LessonPlan;
       });
 
-      // Merge with offline plans
-      const offlinePlans = this.getFromLocalStorage('offline_lesson_plans') || [];
+      // Merge with user-scoped offline plans
+      const offlinePlans = this.getFromUserLocalStorage(teacherId, 'offline_lesson_plans') || [];
       return [...plans, ...offlinePlans];
     } catch (error) {
       console.error('Error fetching lesson plans:', error);
-      return this.getFromLocalStorage('offline_lesson_plans') || [];
+      return this.getFromUserLocalStorage(teacherId, 'offline_lesson_plans') || [];
     }
   }
 
@@ -502,11 +562,14 @@ export class FirebaseService {
       });
     } catch (error) {
       console.error('Error updating lesson plan:', error);
-      this.saveToLocalStorage('pending_updates', {
-        type: 'lesson_plan',
-        id: planId,
-        updates
-      });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_updates', {
+          type: 'lesson_plan',
+          id: planId,
+          updates
+        });
+      }
     }
   }
 
@@ -533,14 +596,18 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error adding student mark:', error);
-      const offlineMark = {
-        ...mark,
-        id: Date.now().toString(),
-        createdAt: new Date(),
-        percentage: Math.round((mark.score / mark.maxScore) * 100)
-      };
-      this.saveToLocalStorage('offline_marks', offlineMark);
-      return offlineMark.id;
+      const user = auth.currentUser;
+      if (user) {
+        const offlineMark = {
+          ...mark,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          percentage: Math.round((mark.score / mark.maxScore) * 100)
+        };
+        this.saveToUserLocalStorage(user.uid, 'offline_marks', offlineMark);
+        return offlineMark.id;
+      }
+      throw error;
     }
   }
 
@@ -572,11 +639,11 @@ export class FirebaseService {
         } as StudentMark;
       });
 
-      const offlineMarks = this.getFromLocalStorage('offline_marks') || [];
+      const offlineMarks = this.getFromUserLocalStorage(teacherId, 'offline_marks') || [];
       return [...marks, ...offlineMarks];
     } catch (error) {
       console.error('Error fetching student marks:', error);
-      return this.getFromLocalStorage('offline_marks') || [];
+      return this.getFromUserLocalStorage(teacherId, 'offline_marks') || [];
     }
   }
 
@@ -593,11 +660,14 @@ export class FirebaseService {
       });
     } catch (error) {
       console.error('Error updating student mark:', error);
-      this.saveToLocalStorage('pending_updates', {
-        type: 'student_mark',
-        id: markId,
-        updates
-      });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_updates', {
+          type: 'student_mark',
+          id: markId,
+          updates
+        });
+      }
     }
   }
 
@@ -606,7 +676,10 @@ export class FirebaseService {
       await deleteDoc(doc(db, 'student_marks', markId));
     } catch (error) {
       console.error('Error deleting student mark:', error);
-      this.saveToLocalStorage('pending_deletions', { type: 'student_mark', id: markId });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_deletions', { type: 'student_mark', id: markId });
+      }
     }
   }
 
@@ -621,13 +694,17 @@ export class FirebaseService {
       return docRef.id;
     } catch (error) {
       console.error('Error saving generated image:', error);
-      const offlineImage = {
-        ...image,
-        id: Date.now().toString(),
-        createdAt: new Date()
-      };
-      this.saveToLocalStorage('offline_images', offlineImage);
-      return offlineImage.id;
+      const user = auth.currentUser;
+      if (user) {
+        const offlineImage = {
+          ...image,
+          id: Date.now().toString(),
+          createdAt: new Date()
+        };
+        this.saveToUserLocalStorage(user.uid, 'offline_images', offlineImage);
+        return offlineImage.id;
+      }
+      throw error;
     }
   }
 
@@ -650,11 +727,11 @@ export class FirebaseService {
         } as GeneratedImage;
       });
 
-      const offlineImages = this.getFromLocalStorage('offline_images') || [];
+      const offlineImages = this.getFromUserLocalStorage(teacherId, 'offline_images') || [];
       return [...images, ...offlineImages];
     } catch (error) {
       console.error('Error fetching generated images:', error);
-      return this.getFromLocalStorage('offline_images') || [];
+      return this.getFromUserLocalStorage(teacherId, 'offline_images') || [];
     }
   }
 
@@ -663,7 +740,10 @@ export class FirebaseService {
       await deleteDoc(doc(db, 'generated_images', imageId));
     } catch (error) {
       console.error('Error deleting generated image:', error);
-      this.saveToLocalStorage('pending_deletions', { type: 'generated_image', id: imageId });
+      const user = auth.currentUser;
+      if (user) {
+        this.saveToUserLocalStorage(user.uid, 'pending_deletions', { type: 'generated_image', id: imageId });
+      }
     }
   }
 
@@ -760,45 +840,52 @@ export class FirebaseService {
     }
   }
 
-  // Local Storage Helpers
-  private static saveToLocalStorage(key: string, data: any): void {
+  // User-Scoped Local Storage Helpers
+  private static saveToUserLocalStorage(userId: string, key: string, data: any): void {
     try {
-      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const userKey = `${key}_${userId}`;
+      const existing = JSON.parse(localStorage.getItem(userKey) || '[]');
       existing.push(data);
-      localStorage.setItem(key, JSON.stringify(existing));
+      localStorage.setItem(userKey, JSON.stringify(existing));
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('Error saving to user localStorage:', error);
     }
   }
 
-  private static getFromLocalStorage(key: string): any[] {
+  private static getFromUserLocalStorage(userId: string, key: string): any[] {
     try {
-      return JSON.parse(localStorage.getItem(key) || '[]');
+      const userKey = `${key}_${userId}`;
+      return JSON.parse(localStorage.getItem(userKey) || '[]');
     } catch (error) {
-      console.error('Error reading from localStorage:', error);
+      console.error('Error reading from user localStorage:', error);
       return [];
     }
   }
 
-  private static clearLocalStorage(key: string): void {
+  private static clearUserLocalStorage(userId: string): void {
     try {
-      localStorage.removeItem(key);
+      const keysToRemove = Object.keys(localStorage).filter(key => key.endsWith(`_${userId}`));
+      keysToRemove.forEach(key => localStorage.removeItem(key));
     } catch (error) {
-      console.error('Error clearing localStorage:', error);
+      console.error('Error clearing user localStorage:', error);
     }
   }
 
   // Sync offline data when back online
   static async syncOfflineData(): Promise<void> {
+    const user = auth.currentUser;
+    if (!user) return;
+
     try {
-      const offlineContent = this.getFromLocalStorage('offline_content');
-      const offlineStudents = this.getFromLocalStorage('offline_students');
-      const offlinePlans = this.getFromLocalStorage('offline_lesson_plans');
-      const offlineAssessments = this.getFromLocalStorage('offline_assessments');
-      const offlineMarks = this.getFromLocalStorage('offline_marks');
-      const offlineImages = this.getFromLocalStorage('offline_images');
-      const pendingUpdates = this.getFromLocalStorage('pending_updates');
-      const pendingDeletions = this.getFromLocalStorage('pending_deletions');
+      const userId = user.uid;
+      const offlineContent = this.getFromUserLocalStorage(userId, 'offline_content');
+      const offlineStudents = this.getFromUserLocalStorage(userId, 'offline_students');
+      const offlinePlans = this.getFromUserLocalStorage(userId, 'offline_lesson_plans');
+      const offlineAssessments = this.getFromUserLocalStorage(userId, 'offline_assessments');
+      const offlineMarks = this.getFromUserLocalStorage(userId, 'offline_marks');
+      const offlineImages = this.getFromUserLocalStorage(userId, 'offline_images');
+      const pendingUpdates = this.getFromUserLocalStorage(userId, 'pending_updates');
+      const pendingDeletions = this.getFromUserLocalStorage(userId, 'pending_deletions');
 
       // Sync content
       for (const content of offlineContent) {
@@ -913,15 +1000,21 @@ export class FirebaseService {
         }
       }
 
-      // Clear synced data
-      this.clearLocalStorage('offline_content');
-      this.clearLocalStorage('offline_students');
-      this.clearLocalStorage('offline_lesson_plans');
-      this.clearLocalStorage('offline_assessments');
-      this.clearLocalStorage('offline_marks');
-      this.clearLocalStorage('offline_images');
-      this.clearLocalStorage('pending_updates');
-      this.clearLocalStorage('pending_deletions');
+      // Clear synced data for this user
+      const userKeys = [
+        'offline_content',
+        'offline_students', 
+        'offline_lesson_plans',
+        'offline_assessments',
+        'offline_marks',
+        'offline_images',
+        'pending_updates',
+        'pending_deletions'
+      ];
+      
+      userKeys.forEach(key => {
+        localStorage.removeItem(`${key}_${userId}`);
+      });
 
       console.log('Offline data synced successfully');
     } catch (error) {

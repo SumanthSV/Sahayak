@@ -4,9 +4,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as admin from 'firebase-admin';
 import { HttpsError } from "firebase-functions/v2/https";
 import json5 from 'json5'
-// import OpenAI from 'openai';
-// import dotenv from 'dotenv';
-// dotenv.config();
 import { GoogleGenAI, Modality } from "@google/genai";
 
 
@@ -16,9 +13,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 const genAIImage = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
- // Imagen is available in this region
-
-// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Enhanced Story Generation with personalization
 export const generatePersonalizedStory = onCall(async (request) => {
@@ -162,15 +156,41 @@ export const generateDifferentiatedWorksheet = onCall(async (request) => {
 // Visual Aid Generation with Actual Image Generatio
 export const generateVisualAidWithImage = onCall(async (request) => {
   try {
-    const { topic, subject, grade, language } = request.data || {};
+    const { topic, subject, grade, language, imageType } = request.data || {};
 
-    if (!topic || !subject || !grade || !language) {
+    if (!topic || !subject || !grade || !language || !imageType) {
       throw new HttpsError("invalid-argument", "Missing required input fields.");
     }
 
-    const prompt = `Hi, create a 3D-style educational image about "${topic}" for Grade ${grade} students.
-    Subject: ${subject}. Language: ${language}.
-    The style should be colorful, age-appropriate, and suitable for Indian classrooms.`;
+    let prompt = "";
+
+    if (imageType === "3D Visuals") {
+      // 3D-style image prompt
+      prompt = `Hi, create a 3D-style educational image about "${topic}" for Grade ${grade} students.
+      Subject: ${subject}. Language: ${language}.
+      The style should be colorful, age-appropriate, and suitable for Indian classrooms.`;
+    } else {
+      // Blackboard/chalkboard-friendly image prompt
+      prompt = `
+        Create a simple, educational illustration for the topic: "${topic}"  
+        Subject: ${subject}  
+        Grade Level: ${grade}  
+        Language: ${language}  
+
+        Requirements:
+        - The illustration must be clean, bold, and easy to replicate on a classroom blackboard or whiteboard using chalk or markers.
+        - Use minimal, clear shapes and lines with strong contrast (e.g., black & white or two-tone style).
+        - Include labeled components in ${language}, using large, readable handwriting-style fonts.
+        - Focus on visual clarity over artistic detail—avoid shading or complex textures.
+        - Show the core concept visually, like diagrams or symbolic representations.
+        - Design must be age-appropriate for grade ${grade}, avoiding unnecessary clutter.
+        - Reflect Indian classroom settings (e.g., local examples or objects familiar to Indian students).
+        - Make the image symmetrical or structured to aid teachers in copying it accurately.
+
+        Goal:
+        Produce a board-friendly visual that helps students understand "${topic}" through simple line drawing and clear labels(like black and white).
+      `;
+    }
 
     const response = await genAIImage.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
@@ -213,101 +233,71 @@ export const generateVisualAidWithImage = onCall(async (request) => {
 });
 
 
-// Mock image generation function (replace with actual image generation service)
-async function generateMockEducationalImage(topic: string, subject: string, grade: string): Promise<string> {
-  // This is a placeholder function that generates a simple SVG as base64
-  // In production, you would integrate with services like:
-  // - DALL-E API
-  // - Midjourney API
-  // - Stable Diffusion
-  // - Google's Imagen
-  
-  const svg = `
-    <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
-      <rect width="400" height="300" fill="#f0f8ff"/>
-      <rect x="20" y="20" width="360" height="260" fill="white" stroke="#4a90e2" stroke-width="2" rx="10"/>
-      <text x="200" y="50" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold" fill="#2c3e50">${topic}</text>
-      <text x="200" y="80" text-anchor="middle" font-family="Arial" font-size="14" fill="#7f8c8d">Subject: ${subject} | Grade: ${grade}</text>
-      
-      <!-- Educational diagram elements -->
-      <circle cx="120" cy="150" r="30" fill="#3498db" stroke="#2980b9" stroke-width="2"/>
-      <text x="120" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">Step 1</text>
-      
-      <rect x="200" y="120" width="60" height="60" fill="#e74c3c" stroke="#c0392b" stroke-width="2" rx="5"/>
-      <text x="230" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">Step 2</text>
-      
-      <polygon points="300,120 330,150 300,180 270,150" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
-      <text x="300" y="155" text-anchor="middle" font-family="Arial" font-size="12" fill="white">Step 3</text>
-      
-      <!-- Arrows -->
-      <path d="M 150 150 L 190 150" stroke="#34495e" stroke-width="2" marker-end="url(#arrowhead)"/>
-      <path d="M 260 150 L 270 150" stroke="#34495e" stroke-width="2" marker-end="url(#arrowhead)"/>
-      
-      <defs>
-        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-          <polygon points="0 0, 10 3.5, 0 7" fill="#34495e"/>
-        </marker>
-      </defs>
-      
-      <text x="200" y="220" text-anchor="middle" font-family="Arial" font-size="12" fill="#7f8c8d">Educational Diagram for ${topic}</text>
-      <text x="200" y="240" text-anchor="middle" font-family="Arial" font-size="10" fill="#95a5a6">Generated by Sahayak AI</text>
-    </svg>
-  `;
-  
-  // Convert SVG to base64
-  const base64 = Buffer.from(svg).toString('base64');
-  return base64;
-}
 
 // Educational Image Generation with actual implementation
 export const generateEducationalImage = onCall(async (request) => {
-  const { prompt, aspectRatio, style, language, subject, grade } = request.data;
-  
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-    
+    const { topic, subject, grade, language } = request.data;
     // Generate detailed image description
-    const imageDescriptionPrompt = `
-      Create a detailed description for an educational image with the following specifications:
-      
-      Prompt: ${prompt}
-      Style: ${style}
-      Aspect Ratio: ${aspectRatio}
-      Subject: ${subject}
-      Grade: ${grade}
-      Language: ${language}
-      
-      Provide a comprehensive description that includes:
-      - Visual composition and layout
-      - Color scheme appropriate for education
-      - Text elements and labels (in ${language})
-      - Educational components and diagrams
-      - Age-appropriate design elements for grade ${grade}
-      - Cultural context relevant to Indian students
-      
-      Make it detailed enough for image generation while being educationally sound.
-    `;
+    const prompt = `
+      Create a simple, educational illustration for the topic: "${topic}"  
+      Subject: ${subject}  
+      Grade Level: ${grade}  
+      Language: ${language}  
 
-    const descriptionResult = await model.generateContent(imageDescriptionPrompt);
-    const description = await descriptionResult.response;
-    
+      Requirements:
+      - The illustration must be clean, bold, and easy to replicate on a classroom blackboard or whiteboard using chalk or markers.
+      - Use minimal, clear shapes and lines with strong contrast (e.g., black & white or two-tone style).
+      - Include labeled components in ${language}, using large, readable handwriting-style fonts.
+      - Focus on visual clarity over artistic detail—avoid shading or complex textures.
+      - Show the core concept visually, like diagrams or symbolic representations.
+      - Design must be age-appropriate for grade ${grade}, avoiding unnecessary clutter.
+      - Reflect Indian classroom settings (e.g., local examples or objects familiar to Indian students).
+      - Make the image symmetrical or structured to aid teachers in copying it accurately.
+
+      Goal:
+      Produce a board-friendly visual that helps students understand "${topic}" through simple line drawing and clear labels.`;
+
+    const response = await genAIImage.models.generateContent({
+      model: "gemini-2.0-flash-preview-image-generation",
+      contents: prompt,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
+      },
+    });
+
+    const parts = response.candidates?.[0]?.content?.parts || [];
+    let textInstructions = "";
+    let base64Image = "";
+    let mimeType = "";
+
+    for (const part of parts) {
+      if (part.text) {
+        textInstructions += part.text;
+      } else if (part.inlineData?.data) {
+        base64Image = part.inlineData.data;
+        mimeType = part.inlineData.mimeType || "image/png";
+      }
+    }
+
+    if (!base64Image) {
+      throw new HttpsError("internal", "Gemini didn't return any image data.");
+    }
+
     // Generate the actual image (using mock function for now)
-    const imageBase64 = await generateMockEducationalImage(prompt, subject || 'general', grade || '3');
+    
     
     return {
-      imageBase64,
-      prompt,
-      metadata: {
-        style,
-        aspectRatio,
-        subject,
-        grade,
-        description: description.text()
-      }
+      imageBase64: base64Image,
+      mimeType,
+      instructions: textInstructions || `Explain "${topic}" using this image.`,
+      materials: ["Board", "Chalk", "Color pens"],
+      timeEstimate: "15 minutes",
+      difficulty: "Easy",
     };
   } catch (error) {
-    console.error('Error generating educational image:', error);
-    throw new Error('Failed to generate educational image');
+    console.error("❌ Gemini Educational image generation failed:", error?.message || error);
+    throw new HttpsError("internal", "Failed to generate image from Gemini.");
   }
 });
 

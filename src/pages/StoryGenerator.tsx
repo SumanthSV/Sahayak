@@ -146,7 +146,7 @@ const StoryGenerator: React.FC = () => {
   const currentSamplePrompt = samplePrompts[selectedLanguage as keyof typeof samplePrompts] || samplePrompts.en;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
       <LoadingTeacher 
         isVisible={isGenerating}
         message="Creating your personalized story... Please wait ⏳"
@@ -157,7 +157,7 @@ const StoryGenerator: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-6 py-8"
+        className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-6 py-8"
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
@@ -171,7 +171,7 @@ const StoryGenerator: React.FC = () => {
               <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 {t('storyTitle')}
               </h1>
-              <p className="text-gray-600 text-lg mt-2">{t('storySubtitle')}</p>
+              <p className="text-gray-600 dark:text-gray-400 text-lg mt-2">{t('storySubtitle')}</p>
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ const StoryGenerator: React.FC = () => {
                   <select
                     value={selectedSubject}
                     onChange={(e) => setSelectedSubject(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                   >
                     {subjects.map((subject) => (
                       <option key={subject.value} value={subject.value}>
@@ -207,7 +207,7 @@ const StoryGenerator: React.FC = () => {
                   <select
                     value={selectedGrade}
                     onChange={(e) => setSelectedGrade(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                   >
                     {grades.map((grade) => (
                       <option key={grade.value} value={grade.value}>
@@ -221,7 +221,7 @@ const StoryGenerator: React.FC = () => {
                   <select
                     value={selectedLanguage}
                     onChange={(e) => setSelectedLanguage(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                   >
                     {availableLanguages.slice(0, 6).map((lang) => (
                       <option key={lang.code} value={lang.code}>
@@ -242,7 +242,7 @@ const StoryGenerator: React.FC = () => {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder={t('enterPrompt')}
-                    className="w-full h-32 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white/50 backdrop-blur-sm"
+                    className="w-full h-32 p-4 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none bg-white/50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                   />
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -250,8 +250,8 @@ const StoryGenerator: React.FC = () => {
                     onClick={handleVoiceInput}
                     className={`absolute top-3 right-3 p-2 rounded-lg transition-all duration-200 ${
                       isListening
-                        ? 'bg-red-100 text-red-600 animate-pulse'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 animate-pulse'
+                        : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
                     }`}
                   >
                     {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
@@ -260,10 +260,10 @@ const StoryGenerator: React.FC = () => {
               </InputField>
               
               <InputField label="Sample Prompt">
-                <div className="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl border border-purple-200 dark:border-purple-700/50">
                   <button
                     onClick={() => setPrompt(currentSamplePrompt)}
-                    className="text-left text-sm text-purple-700 hover:text-purple-800 hover:underline w-full"
+                    className="text-left text-sm text-purple-700 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-200 hover:underline w-full"
                   >
                     {currentSamplePrompt}
                   </button>
@@ -300,7 +300,7 @@ const StoryGenerator: React.FC = () => {
                 className="h-full"
               />
             ) : (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200/50 p-8 h-full flex items-center justify-center">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8 h-full flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
                     animate={{ 
@@ -312,30 +312,29 @@ const StoryGenerator: React.FC = () => {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                    className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6"
                   >
-                    <BookOpen className="w-12 h-12 text-purple-500" />
+                    <BookOpen className="w-12 h-12 text-purple-500 dark:text-purple-400" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Ready to Create Stories</h3>
-                  <p className="text-gray-600 mb-4">Your AI-generated story will appear here</p>
-                  <p className="text-sm text-gray-500">Fill in the form and click generate to get started</p>
-                  {/* <button  onClick={generatePDF}>Click</button> */}
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ready to Create Stories</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">Your AI-generated story will appear here</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Fill in the form and click generate to get started</p>
                 </div>
               </div>
             )}
             
             {/* Feedback Section */}
             {generatedStory && (
-              <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200/50">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">Rate this story:</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Rate this story:</span>
                   <div className="flex items-center space-x-2">
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleFeedback('like')}
                       className={`p-2 rounded-full transition-all duration-200 ${
-                        feedback === 'like' ? 'bg-green-100 text-green-600' : 'text-gray-400 hover:text-green-500'
+                        feedback === 'like' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500 hover:text-green-500 dark:hover:text-green-400'
                       }`}
                     >
                       <ThumbsUp className="w-4 h-4" />
@@ -345,7 +344,7 @@ const StoryGenerator: React.FC = () => {
                       whileTap={{ scale: 0.9 }}
                       onClick={() => handleFeedback('dislike')}
                       className={`p-2 rounded-full transition-all duration-200 ${
-                        feedback === 'dislike' ? 'bg-red-100 text-red-600' : 'text-gray-400 hover:text-red-500'
+                        feedback === 'dislike' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400'
                       }`}
                     >
                       <ThumbsDown className="w-4 h-4" />

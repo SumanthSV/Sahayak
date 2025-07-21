@@ -26,6 +26,7 @@ export interface VisualAidRequest {
   subject: string;
   grade: string;
   language: string;
+  imageType: string;
   includeImage: boolean;
 }
 
@@ -177,8 +178,8 @@ export class AIService {
   }> {
     try {
       console.log("before generateVisualAidWithImage");
-      const result = await this.generateVisualAidWithImageFunction(request);
-
+      const result =  await this.generateVisualAidWithImageFunction(request);
+      
       console.log("after generateVisualAidWithImage");
       console.log(result.data);
       return result.data as {
@@ -249,25 +250,6 @@ export class AIService {
     }
   }
 
-  // Image Generation
-  static async generateEducationalImage(request: ImageGenerationRequest): Promise<{
-    imageBase64: string;
-    prompt: string;
-    metadata: {
-      style: string;
-      aspectRatio: string;
-      subject?: string;
-      grade?: string;
-    };
-  }> {
-    try {
-      const result = await this.generateEducationalImageFunction(request);
-      return (result.data as any);
-    } catch (error) {
-      console.error('Error generating educational image:', error);
-      throw new Error('Failed to generate educational image. Please check your connection and try again.');
-    }
-  }
 
   // Educational Games Generation
   static async generateEducationalGame(request: GameGenerationRequest): Promise<any> {

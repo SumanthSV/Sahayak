@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -28,27 +28,45 @@ const Settings: React.FC = () => {
   const [notifications, setNotifications] = useState(true);
   const [autoSave, setAutoSave] = useState(true);
   const [offlineMode, setOfflineMode] = useState(false);
-  const [theme, setTheme] = useState('light');
+  const [autoSaveContent, setAutoSaveContent] = useState(false);
+
+  useEffect(() => {
+    // Load user-scoped settings
+    if (user) {
+      const savedSettings = localStorage.getItem(`settings_${user.uid}`);
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setNotifications(settings.notifications ?? true);
+        setAutoSave(settings.autoSave ?? true);
+        setOfflineMode(settings.offlineMode ?? false);
+        setAutoSaveContent(settings.autoSaveContent ?? false);
+      }
+    }
+  }, [user]);
 
   const handleSaveSettings = () => {
-    // Save settings to localStorage
-    localStorage.setItem('settings', JSON.stringify({
+    if (!user) return;
+    
+    // Save user-scoped settings
+    localStorage.setItem(`settings_${user.uid}`, JSON.stringify({
       notifications,
       autoSave,
       offlineMode,
-      theme,
+      autoSaveContent,
       language: currentLanguage
     }));
     toast.success('Settings saved successfully!');
   };
 
   const handleClearCache = () => {
-    // Clear local storage cache
-    const keysToKeep = ['preferred-language', 'settings'];
+    if (!user) return;
+    
+    // Clear user-scoped cache
+    const keysToKeep = [`preferred-language`, `settings_${user.uid}`];
     const allKeys = Object.keys(localStorage);
     
     allKeys.forEach(key => {
-      if (!keysToKeep.includes(key)) {
+      if (!keysToKeep.includes(key) && key.endsWith(`_${user.uid}`)) {
         localStorage.removeItem(key);
       }
     });
@@ -57,6 +75,8 @@ const Settings: React.FC = () => {
   };
 
   const handleExportData = () => {
+    if (!user) return;
+    
     // Export user data
     const userData = {
       profile: {
@@ -67,7 +87,7 @@ const Settings: React.FC = () => {
         language: currentLanguage,
         notifications,
         autoSave,
-        theme
+        autoSaveContent
       },
       exportDate: new Date().toISOString()
     };
@@ -86,7 +106,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto bg-transparent">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -101,55 +121,70 @@ const Settings: React.FC = () => {
             <SettingsIcon className="w-6 h-6 text-white" />
           </motion.div>
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
               {t('settings')}
             </h1>
-            <p className="text-gray-600">Customize your Sahayak AI experience</p>
+            <p className="text-gray-600 dark:text-gray-400">Customize your Sahayak AI experience</p>
           </div>
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Language & Localization */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Content & Storage */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6"
         >
           <div className="flex items-center space-x-3 mb-6">
-            <Globe className="w-6 h-6 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-800">Language & Localization</h2>
+            <Save className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Content & Storage</h2>
           </div>
           
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Interface Language
-              </label>
-              <div className="grid grid-cols-1 gap-2">
-                {availableLanguages.map((language) => (
-                  <motion.button
-                    key={language.code}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => changeLanguage(language.code)}
-                    className={`w-full text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center space-x-3 ${
-                      currentLanguage === language.code
-                        ? 'bg-blue-50 text-blue-700 border-2 border-blue-200'
-                        : 'bg-gray-50 text-gray-700 border-2 border-transparent hover:bg-gray-100'
-                    }`}
-                  >
-                    <span className="text-lg">{language.flag}</span>
-                    <div>
-                      <div className="font-medium">{language.nativeName}</div>
-                      <div className="text-xs text-gray-500">{language.name}</div>
-                    </div>
-                    {currentLanguage === language.code && (
-                      <div className="ml-auto w-2 h-2 bg-blue-500 rounded-full"></div>
-                    )}
-                  </motion.button>
-                ))}
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div>
+                <h3 className="font-medium text-gray-800 dark:text-gray-200">Auto-save Generated Content</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Automatically save all generated content for offline access</p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setAutoSaveContent(!autoSaveContent)}
+                className={`w-12 h-6 rounded-full transition-all duration-200 ${
+                  autoSaveContent ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
+                } relative`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform duration-200 ${
+                  autoSaveContent ? 'translate-x-6' : 'translate-x-0.5'
+                }`}></div>
+              </motion.button>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div>
+                <h3 className="font-medium text-gray-800 dark:text-gray-200">Offline Image Storage</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Store generated images locally for offline access</p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setOfflineMode(!offlineMode)}
+                className={`w-12 h-6 rounded-full transition-all duration-200 ${
+                  offlineMode ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                } relative`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform duration-200 ${
+                  offlineMode ? 'translate-x-6' : 'translate-x-0.5'
+                }`}></div>
+              </motion.button>
+            </div>
+            
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700/50">
+              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Storage Information</h3>
+              <div className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+                <p>• Content saved: {user ? (localStorage.getItem(`offline_content_${user.uid}`)?.length || 0) : 0} items</p>
+                <p>• Images cached: {user ? (localStorage.getItem(`offline_images_${user.uid}`)?.length || 0) : 0} items</p>
+                <p>• Storage used: ~{Math.round((JSON.stringify(localStorage).length / 1024))} KB</p>
               </div>
             </div>
           </div>
@@ -160,24 +195,42 @@ const Settings: React.FC = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6"
         >
           <div className="flex items-center space-x-3 mb-6">
-            <Bell className="w-6 h-6 text-yellow-600" />
-            <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
+            <Bell className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Notifications & Preferences</h2>
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
               <div>
-                <h3 className="font-medium text-gray-800">Auto-save Content</h3>
-                <p className="text-sm text-gray-600">Automatically save generated content</p>
+                <h3 className="font-medium text-gray-800 dark:text-gray-200">Push Notifications</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Receive notifications for important updates</p>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setNotifications(!notifications)}
+                className={`w-12 h-6 rounded-full transition-all duration-200 ${
+                  notifications ? 'bg-yellow-500' : 'bg-gray-300 dark:bg-gray-600'
+                } relative`}
+              >
+                <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform duration-200 ${
+                  notifications ? 'translate-x-6' : 'translate-x-0.5'
+                }`}></div>
+              </motion.button>
+            </div>
+            
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
+              <div>
+                <h3 className="font-medium text-gray-800 dark:text-gray-200">Auto-save Drafts</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Automatically save work in progress</p>
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setAutoSave(!autoSave)}
                 className={`w-12 h-6 rounded-full transition-all duration-200 ${
-                  autoSave ? 'bg-green-500' : 'bg-gray-300'
+                  autoSave ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'
                 } relative`}
               >
                 <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform duration-200 ${
@@ -193,45 +246,45 @@ const Settings: React.FC = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6"
         >
           <div className="flex items-center space-x-3 mb-6">
             {isOnline ? (
-              <Wifi className="w-6 h-6 text-green-600" />
+              <Wifi className="w-6 h-6 text-green-600 dark:text-green-400" />
             ) : (
-              <WifiOff className="w-6 h-6 text-red-600" />
+              <WifiOff className="w-6 h-6 text-red-600 dark:text-red-400" />
             )}
-            <h2 className="text-xl font-semibold text-gray-800">Connectivity</h2>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Connectivity</h2>
           </div>
           
           <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-xl border border-blue-200/50">
-              <h3 className="font-medium text-blue-800 mb-2">Connection Status</h3>
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200/50 dark:border-blue-700/50">
+              <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Connection Status</h3>
               <div className="flex items-center space-x-2">
                 {isOnline ? (
                   <>
                     <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-700">Online - All features available</span>
+                    <span className="text-sm text-green-700 dark:text-green-300">Online - All features available</span>
                   </>
                 ) : (
                   <>
                     <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="text-sm text-red-700">Offline - Limited functionality</span>
+                    <span className="text-sm text-red-700 dark:text-red-300">Offline - Limited functionality</span>
                   </>
                 )}
               </div>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
               <div>
-                <h3 className="font-medium text-gray-800">Offline Mode</h3>
-                <p className="text-sm text-gray-600">Enable offline functionality when possible</p>
+                <h3 className="font-medium text-gray-800 dark:text-gray-200">Enhanced Offline Mode</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Cache more content for better offline experience</p>
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setOfflineMode(!offlineMode)}
                 className={`w-12 h-6 rounded-full transition-all duration-200 ${
-                  offlineMode ? 'bg-blue-500' : 'bg-gray-300'
+                  offlineMode ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
                 } relative`}
               >
                 <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-transform duration-200 ${
@@ -247,11 +300,11 @@ const Settings: React.FC = () => {
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6"
         >
           <div className="flex items-center space-x-3 mb-6">
-            <Shield className="w-6 h-6 text-purple-600" />
-            <h2 className="text-xl font-semibold text-gray-800">Data & Privacy</h2>
+            <Shield className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Data & Privacy</h2>
           </div>
           
           <div className="space-y-4">
@@ -259,12 +312,12 @@ const Settings: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleExportData}
-              className="w-full flex items-center space-x-3 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-all duration-200 border border-green-200/50"
+              className="w-full flex items-center space-x-3 p-4 bg-green-50 dark:bg-green-900/30 rounded-xl hover:bg-green-100 dark:hover:bg-green-900/50 transition-all duration-200 border border-green-200/50 dark:border-green-700/50"
             >
-              <Download className="w-5 h-5 text-green-600" />
+              <Download className="w-5 h-5 text-green-600 dark:text-green-400" />
               <div className="text-left">
-                <p className="font-medium text-green-800">Export Data</p>
-                <p className="text-sm text-green-600">Download your data as JSON</p>
+                <p className="font-medium text-green-800 dark:text-green-300">Export Data</p>
+                <p className="text-sm text-green-600 dark:text-green-400">Download your data as JSON</p>
               </div>
             </motion.button>
             
@@ -272,12 +325,12 @@ const Settings: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleClearCache}
-              className="w-full flex items-center space-x-3 p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-all duration-200 border border-orange-200/50"
+              className="w-full flex items-center space-x-3 p-4 bg-orange-50 dark:bg-orange-900/30 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-all duration-200 border border-orange-200/50 dark:border-orange-700/50"
             >
-              <Trash2 className="w-5 h-5 text-orange-600" />
+              <Trash2 className="w-5 h-5 text-orange-600 dark:text-orange-400" />
               <div className="text-left">
-                <p className="font-medium text-orange-800">Clear Cache</p>
-                <p className="text-sm text-orange-600">Remove stored temporary data</p>
+                <p className="font-medium text-orange-800 dark:text-orange-300">Clear Cache</p>
+                <p className="text-sm text-orange-600 dark:text-orange-400">Remove stored temporary data</p>
               </div>
             </motion.button>
           </div>
@@ -288,62 +341,62 @@ const Settings: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          className="lg:col-span-2 bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+          className="lg:col-span-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6"
         >
           <div className="flex items-center space-x-3 mb-6">
-            <User className="w-6 h-6 text-indigo-600" />
-            <h2 className="text-xl font-semibold text-gray-800">Profile Information</h2>
+            <User className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Profile Information</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Display Name
                 </label>
                 <input
                   type="text"
                   value={user?.displayName || ''}
                   readOnly
-                  className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={user?.email || ''}
                   readOnly
-                  className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                 />
               </div>
             </div>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Account Created
                 </label>
                 <input
                   type="text"
                   value={user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A'}
                   readOnly
-                  className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Last Sign In
                 </label>
                 <input
                   type="text"
                   value={user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString() : 'N/A'}
                   readOnly
-                  className="w-full p-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
                 />
               </div>
             </div>
@@ -356,13 +409,13 @@ const Settings: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.6 }}
-        className="mt-8 flex justify-center"
+        className="mt-6 flex justify-center"
       >
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleSaveSettings}
-          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-8 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center space-x-2"
+          className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center space-x-2"
         >
           <Save className="w-5 h-5" />
           <span>Save Settings</span>

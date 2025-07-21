@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from './hooks/useAuth';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
-import { useResponsiveBreakpoints } from './hooks/useResponsiveBreakpoints';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { LoadingSpinner } from './components/UI/LoadingSpinner';
 import { OfflineIndicator } from './components/UI/OfflineIndicator';
@@ -25,9 +24,8 @@ const Games = React.lazy(() => import('./pages/Games'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const isOnline = useOnlineStatus();
-  const { isMobile, isTablet, isDesktop } = useResponsiveBreakpoints();
   const [showSignup, setShowSignup] = useState(false);
   const [isVoiceActive, setIsVoiceActive] = useState(false);
 
@@ -51,33 +49,14 @@ function App() {
   }, []);
 
   // Add responsive classes to body
-  useEffect(() => {
-    const bodyClasses = ['responsive-app'];
-    
-    if (isMobile) bodyClasses.push('mobile-view');
-    if (isTablet) bodyClasses.push('tablet-view');
-    if (isDesktop) bodyClasses.push('desktop-view');
-    
-    document.body.className = bodyClasses.join(' ');
-    
-    return () => {
-      document.body.className = '';
-    };
-  }, [isMobile, isTablet, isDesktop]);
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  // if (loading) {
+  //   return <LoadingSpinner />;
+  // }
 
   return (
     <LanguageProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        {/* Skip Link for Accessibility
-        <a href="#main-content" className="skip-link">
-          Skip to main content
-        </a> */}
-
-        {/* Offline Indicator */}
         <OfflineIndicator isOnline={isOnline} />
         
         <AnimatePresence mode="wait">
@@ -85,15 +64,11 @@ function App() {
             {!user ? (
               <Routes>
                 <Route path="/signup" element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
+                  <div
                     className="container-responsive"
                   >
                     <SignupForm onBackToLogin={() => setShowSignup(false)} />
-                  </motion.div>
+                  </div>
                 } />
                 <Route path="/*" element={
                   <motion.div
@@ -136,7 +111,6 @@ function App() {
         {user && (
           <VoiceButton 
             position="fixed"
-            size={isMobile ? 'md' : 'lg'}
             isRecording={isVoiceActive}
             onStartRecording={() => setIsVoiceActive(true)}
             onStopRecording={() => setIsVoiceActive(false)}

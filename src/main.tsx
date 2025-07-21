@@ -5,7 +5,15 @@ import { I18nextProvider } from 'react-i18next';
 import { Toaster } from 'react-hot-toast';
 import App from './App.tsx';
 import i18n from './config/i18n';
-import './index.css'; // Initialize pdfMake configuration
+import './index.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/poppins/400.css';
+import '@fontsource/poppins/500.css';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css'; // Initialize pdfMake configuration
 
 // Service Worker registration for offline support
 if ('serviceWorker' in navigator) {

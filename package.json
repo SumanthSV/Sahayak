@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.6",
+    "@fontsource/poppins": "^5.2.6",
+    "@fontsource/roboto": "^5.2.6",
     "@google-cloud/aiplatform": "^4.4.0",
     "@google-cloud/vertexai": "^1.10.0",
     "@google/generative-ai": "^0.24.1",

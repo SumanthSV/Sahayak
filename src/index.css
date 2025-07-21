@@ -72,3 +72,20 @@
   outline: 3px solid #0066cc !important;
   outline-offset: 2px !important;
 }
+
+
+:root{
+  --main-text-color : oklch(55.2% 0.016 285.938);
+  --main-subtext-color : oklch(55.2% 0.016 285.938);
+  --main-background : white;
+  --main-subbackground : oklch(99.421% 0.00781 178.16);
+  --main-card-background : 
+}
+
+.dark{
+  --main-text-color :oklch(96.7% 0.001 286.375) ;
+  --main-subtext-color : oklch(92% 0.004 286.32);
+  --main-background : oklch(14.1% 0.005 285.823);
+  --main-subbackground : oklch(27.4% 0.006 286.033);
+
+}

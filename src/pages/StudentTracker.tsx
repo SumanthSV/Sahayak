@@ -369,7 +369,7 @@ const StudentTracker: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto dark:bg-black">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -380,15 +380,15 @@ const StudentTracker: React.FC = () => {
           <div className="flex items-center space-x-3">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center"
+              className="w-12 h-12  rounded-xl flex items-center justify-center"
             >
-              <Users className="w-6 h-6 text-white" />
+              <Users className="w-6 h-6 dark:text-white text-black" />
             </motion.div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl dark:text-zinc-200 font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                 Multi-Grade Student Tracker
               </h1>
-              <p className="text-gray-600">Monitor student progress across all grades and classes</p>
+              <p className="text-gray-600 dark:text-zinc-200 text-sm">Monitor student progress across all grades and classes</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -396,19 +396,19 @@ const StudentTracker: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={exportStudentData}
-              className="bg-green-500 text-white font-semibold py-3 px-6 rounded-xl hover:bg-green-600 transition-all duration-200 flex items-center space-x-2"
+              className=" text-zinc-800 dark:text-white border border-none dark:border-zinc-600 font-semibold py-2 px-4 rounded-xl  transition-all duration-200 flex items-center space-x-2"
             >
-              <Download className="w-5 h-5" />
-              <span>Export Data</span>
+              <Download className="w-3 h-3" />
+              <span className='text-sm'>Export Data</span>
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsAddingStudent(true)}
-              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 flex items-center space-x-2"
+              className=" dark:text-white border dark:border-zinc-600  font-semibold py-2 px-4 rounded-xl hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 flex items-center space-x-2"
             >
-              <Plus className="w-5 h-5" />
-              <span>Add Student</span>
+              <Plus className="w-3 h-3" />
+              <span className='text-sm'>Add Student</span>
             </motion.button>
           </div>
         </div>
@@ -422,11 +422,11 @@ const StudentTracker: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
         >
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
+          <div className="bg-white/80 dark:bg-black dark:border-zinc-500  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Students</p>
-                <p className="text-3xl font-bold text-gray-800">{classStats.totalStudents}</p>
+                <p className="text-gray-600 dark:text-zinc-200 text-xs font-medium">Total Students</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-zinc-200">{classStats.totalStudents}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
@@ -434,11 +434,11 @@ const StudentTracker: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
+          <div className="bg-white/80 dark:bg-black dark:border-zinc-500  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Average Score</p>
-                <p className="text-3xl font-bold text-gray-800">{classStats.averageScore}%</p>
+                <p className="text-gray-600 dark:text-zinc-200 text-xs font-medium">Average Score</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-zinc-200">{classStats.averageScore}%</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-6 h-6 text-white" />
@@ -446,11 +446,11 @@ const StudentTracker: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
+          <div className="bg-white/80 dark:bg-black dark:border-zinc-500  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Attendance Rate</p>
-                <p className="text-3xl font-bold text-gray-800">{classStats.attendanceRate}%</p>
+                <p className="text-gray-600 dark:text-zinc-200 text-xs font-medium">Attendance Rate</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-zinc-200">{classStats.attendanceRate}%</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
                 <GraduationCap className="w-6 h-6 text-white" />
@@ -458,11 +458,11 @@ const StudentTracker: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
+          <div className="bg-white/80 dark:bg-black dark:border-zinc-500  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Top Performers</p>
-                <p className="text-3xl font-bold text-gray-800">{classStats.topPerformers.length}</p>
+                <p className="text-gray-600 dark:text-zinc-200 text-xs font-medium">Top Performers</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-zinc-200">{classStats.topPerformers.length}</p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
                 <Award className="w-6 h-6 text-white" />
@@ -477,7 +477,7 @@ const StudentTracker: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
+        className="bg-white/80 dark:bg-black backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
       >
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
           <div className="flex items-center space-x-4">
@@ -488,13 +488,13 @@ const StudentTracker: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search students..."
-                className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent w-64 bg-white/50 backdrop-blur-sm"
+                className="pl-10 pr-4 py-3 border border-gray-200 rounded-xl  w-64 bg-white/50 dark:bg-zinc-950 dark:bg-zinc-950 backdrop-blur-sm"
               />
             </div>
             <select
               value={selectedGrade}
               onChange={(e) => setSelectedGrade(e.target.value)}
-              className="p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              className="p-3 border border-gray-200 dark:text-zinc-200 rounded-xl bg-white/50 dark:bg-zinc-950 dark:bg-zinc-950 backdrop-blur-sm"
             >
               {grades.map((grade) => (
                 <option key={grade.value} value={grade.value}>
@@ -505,7 +505,7 @@ const StudentTracker: React.FC = () => {
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              className="p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 dark:bg-zinc-950 backdrop-blur-sm"
             >
               {classes.map((cls) => (
                 <option key={cls.value} value={cls.value}>
@@ -514,7 +514,7 @@ const StudentTracker: React.FC = () => {
               ))}
             </select>
           </div>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-zinc-200">
             Showing {filteredStudents.length} of {students.length} students
           </p>
         </div>
@@ -526,10 +526,10 @@ const StudentTracker: React.FC = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
+          className="bg-white/80 dark:bg-black backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
         >
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-zinc-200">
               {editingStudent ? 'Edit Student' : 'Add New Student'}
             </h2>
             <button
@@ -543,7 +543,7 @@ const StudentTracker: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                   Student Name *
                 </label>
                 <input
@@ -551,19 +551,19 @@ const StudentTracker: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Enter student name..."
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                  className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     Grade *
                   </label>
                   <select
                     value={formData.grade}
                     onChange={(e) => handleInputChange('grade', e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                   >
                     {grades.slice(1).map((grade) => (
                       <option key={grade.value} value={grade.value}>
@@ -574,13 +574,13 @@ const StudentTracker: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     Class/Section
                   </label>
                   <select
                     value={formData.class}
                     onChange={(e) => handleInputChange('class', e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                   >
                     {classes.slice(1).map((cls) => (
                       <option key={cls.value} value={cls.value}>
@@ -591,7 +591,7 @@ const StudentTracker: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     Roll Number *
                   </label>
                   <input
@@ -599,32 +599,32 @@ const StudentTracker: React.FC = () => {
                     value={formData.rollNumber}
                     onChange={(e) => handleInputChange('rollNumber', e.target.value)}
                     placeholder="Roll number..."
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     Date of Birth
                   </label>
                   <input
                     type="date"
                     value={formData.dateOfBirth}
                     onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                     Gender
                   </label>
                   <select
                     value={formData.gender}
                     onChange={(e) => handleInputChange('gender', e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                   >
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -634,7 +634,7 @@ const StudentTracker: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                   Parent Contact
                 </label>
                 <input
@@ -642,37 +642,37 @@ const StudentTracker: React.FC = () => {
                   value={formData.parentContact}
                   onChange={(e) => handleInputChange('parentContact', e.target.value)}
                   placeholder="Parent phone number..."
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                  className="w-full p-3 border border-gray-200 rounded-xl  bg-white/50 dark:border-zinc-800 dark:bg-zinc-950 backdrop-blur-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                   Address
                 </label>
                 <textarea
                   value={formData.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   placeholder="Student address..."
-                  className="w-full h-20 p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none bg-white/50 backdrop-blur-sm"
+                  className="w-full h-20 p-3 border border-gray-200 rounded-xl  resize-none bg-white/50 dark:bg-zinc-950 backdrop-blur-sm"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                 Subjects
               </label>
-              <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white/50 backdrop-blur-sm">
+              <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white/50 dark:bg-zinc-950 backdrop-blur-sm">
                 {subjects.map((subject) => (
-                  <label key={subject} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50">
+                  <label key={subject} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 hover:dark:bg-zinc-900">
                     <input
                       type="checkbox"
                       checked={formData.subjects.includes(subject)}
                       onChange={() => handleSubjectToggle(subject)}
                       className="rounded border-gray-300 text-teal-600 focus:ring-teal-500"
                     />
-                    <span className="text-sm text-gray-700">{subject}</span>
+                    <span className="text-sm text-gray-700 dark:text-zinc-200">{subject}</span>
                   </label>
                 ))}
               </div>
@@ -682,7 +682,7 @@ const StudentTracker: React.FC = () => {
           <div className="flex justify-end space-x-4 mt-6">
             <button
               onClick={resetForm}
-              className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
+              className="px-2 py-1 text-sm border border-gray-300 dark:border-zinc-500 rounded-xl hover:bg-gray-50 transition-all duration-200"
             >
               Cancel
             </button>
@@ -691,7 +691,7 @@ const StudentTracker: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               onClick={handleSaveStudent}
               disabled={!formData.name.trim() || !formData.rollNumber.trim() || isSaving}
-              className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 flex items-center space-x-2"
+              className="bg-gray-100 dark:bg-black border dark:border-zinc-500 text-white  text-sm font-semibold py-3 px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:from-teal-600 hover:to-cyan-600 transition-all duration-200 flex items-center space-x-2"
             >
               {isSaving ? (
                 <>
@@ -714,9 +714,9 @@ const StudentTracker: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6"
+        className="bg-white/80 dark:bg-black dark:border-zinc-500  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:bg-black p-6"
       >
-        <h2 className="text-xl font-semibold text-gray-800 mb-6">Students</h2>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-zinc-200 mb-6">Students</h2>
         
         {isLoading ? (
           <div className="text-center py-8">
@@ -746,16 +746,16 @@ const StudentTracker: React.FC = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                   whileHover={{ scale: 1.02 }}
-                  className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                  className="border border-zinc-800 rounded-xl p-6 hover:shadow-md transition-all duration-200 bg-white/50 dark:bg-black backdrop-blur-sm"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 text-lg">{student.name}</h3>
-                      <p className="text-gray-600">
+                      <h3 className="font-semibold text-gray-800 dark:text-zinc-200 text-lg">{student.name}</h3>
+                      <p className="text-gray-600 dark:text-zinc-200 text-sm">
                         Grade {student.grade} • Section {(student as any).class || 'A'} • Roll #{student.rollNumber}
                       </p>
                       {(student as any).parentContact && (
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-gray-500 dark:text-zinc-200 mt-1">
                           Contact: {(student as any).parentContact}
                         </p>
                       )}
@@ -793,10 +793,10 @@ const StudentTracker: React.FC = () => {
 
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-gray-700">Overall Performance</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-zinc-200">Overall Performance</span>
                       <div className="flex items-center space-x-1">
                         <Award className="w-4 h-4 text-yellow-500" />
-                        <span className="font-semibold text-gray-800">{averageScore}%</span>
+                        <span className="font-semibold text-gray-800 dark:text-zinc-300">{averageScore}%</span>
                       </div>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
@@ -808,10 +808,10 @@ const StudentTracker: React.FC = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-gray-700 mb-2">Subject Progress:</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">Subject Progress:</p>
                     {progress.slice(0, 3).map((prog, index) => (
                       <div key={index} className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{prog.subject}</span>
+                        <span className="text-gray-600 dark:text-zinc-200">{prog.subject}</span>
                         <div className="flex items-center space-x-2">
                           <span className="font-medium">{prog.score}%</span>
                           <div className="flex items-center">
@@ -825,7 +825,7 @@ const StudentTracker: React.FC = () => {
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-zinc-300">
                       <span>Subjects: {student.subjects.length}</span>
                       <span>Attendance: {progress[0]?.attendance || 85}%</span>
                     </div>
@@ -843,10 +843,10 @@ const StudentTracker: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+            className="bg-white dark:bg-zinc-950 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
           >
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 className="text-xl font-semibold text-gray-800  dark:text-zinc-200">
                 Marks for {selectedStudentForMarks.name}
               </h2>
               <button
@@ -864,17 +864,17 @@ const StudentTracker: React.FC = () => {
             <div className="p-6 max-h-[calc(90vh-120px)] overflow-y-auto">
               {/* Add Mark Form */}
               {isAddingMark ? (
-                <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                  <h3 className="font-semibold text-gray-800 mb-4">Add New Mark</h3>
+                <div className="bg-gray-50 dark:bg-zinc-950 rounded-xl p-4 mb-6">
+                  <h3 className="font-semibold text-gray-800 mb-4 dark:text-zinc-200">Add New Mark</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                         Subject
                       </label>
                       <select
                         value={markForm.subject}
                         onChange={(e) => setMarkForm(prev => ({ ...prev, subject: e.target.value }))}
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-full p-3 border border-gray-200 rounded-xl dark:bg-zinc-950 "
                       >
                         {subjects.map((subject) => (
                           <option key={subject} value={subject}>{subject}</option>
@@ -882,7 +882,7 @@ const StudentTracker: React.FC = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                         Test/Assignment Name *
                       </label>
                       <input
@@ -890,11 +890,11 @@ const StudentTracker: React.FC = () => {
                         value={markForm.testName}
                         onChange={(e) => setMarkForm(prev => ({ ...prev, testName: e.target.value }))}
                         placeholder="e.g., Unit Test 1, Quiz 2"
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-full p-3 border border-gray-200 rounded-xl  dark:bg-zinc-950"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                         Score Obtained *
                       </label>
                       <input
@@ -902,11 +902,11 @@ const StudentTracker: React.FC = () => {
                         value={markForm.score}
                         onChange={(e) => setMarkForm(prev => ({ ...prev, score: e.target.value }))}
                         placeholder="85"
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-full p-3 border border-gray-200 rounded-xl  dark:bg-zinc-950"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                         Maximum Score
                       </label>
                       <input
@@ -914,25 +914,25 @@ const StudentTracker: React.FC = () => {
                         value={markForm.maxScore}
                         onChange={(e) => setMarkForm(prev => ({ ...prev, maxScore: e.target.value }))}
                         placeholder="100"
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-full p-3 border border-gray-200 rounded-xl  dark:bg-zinc-950"
                       />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-zinc-200 mb-2">
                         Remarks (Optional)
                       </label>
                       <textarea
                         value={markForm.remarks}
                         onChange={(e) => setMarkForm(prev => ({ ...prev, remarks: e.target.value }))}
                         placeholder="Good performance, needs improvement in..."
-                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-teal-500 focus:border-transparent h-20 resize-none"
+                        className="w-full p-3 border border-gray-200 rounded-xl  h-20 resize-none  dark:bg-zinc-950"
                       />
                     </div>
                   </div>
                   <div className="flex justify-end space-x-3 mt-4">
                     <button
                       onClick={() => setIsAddingMark(false)}
-                      className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200"
+                      className="px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 hover:dark:bg-zinc-900 text-sm transition-all duration-200"
                     >
                       Cancel
                     </button>
@@ -940,7 +940,7 @@ const StudentTracker: React.FC = () => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSaveMark}
-                      className="px-6 py-2 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-all duration-200"
+                      className="px-6 py-2  text-white rounded-xl border border-zinc-400 text-sm transition-all duration-200"
                     >
                       Save Mark
                     </motion.button>
@@ -962,7 +962,7 @@ const StudentTracker: React.FC = () => {
 
               {/* Marks List */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-800">Previous Marks</h3>
+                <h3 className="font-semibold text-gray-800 dark:text-zinc-200">Previous Marks</h3>
                 {studentMarks.length === 0 ? (
                   <div className="text-center py-8 text-gray-500">
                     <Award className="w-12 h-12 mx-auto mb-4 text-gray-300" />

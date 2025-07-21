@@ -12,7 +12,8 @@ import {
   Trash2,
   Plus,
   Volume2,
-  VolumeX
+  VolumeX,
+  ImageIcon
 } from 'lucide-react'; 
 import { Image } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -20,6 +21,7 @@ import { FirebaseService, GeneratedContent, GeneratedImage, UserData } from '../
 import { Modal } from '../components/UI/Modal';
 import { generatePDF } from '../utils/pdfGenerator';
 import toast from 'react-hot-toast';
+import '../index.css'
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
@@ -141,7 +143,7 @@ const Dashboard: React.FC = () => {
       case 'worksheet': return 'from-blue-500 to-cyan-500';
       case 'visual-aid': return 'from-orange-500 to-red-500';
       case 'concept-explanation': return 'from-green-500 to-emerald-500';
-      default: return 'from-gray-500 to-slate-500';
+      default: return 'from-mainsubtextColor to-slate-500';
     }
   };
 
@@ -177,17 +179,17 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto min-h-screen">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto min-h-screen bg-white dark:bg-black">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="mb-6"
       >
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
           Welcome back, {user?.displayName || 'Teacher'}!
         </h1>
-        <p className="text-gray-600">Here's your saved content and progress</p>
+        <p className="text-gray-600 dark:text-gray-400">Here's your saved content and progress</p>
       </motion.div>
 
       {/* Stats Grid */}
@@ -198,8 +200,7 @@ const Dashboard: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ scale: 1.02, y: -5 }}
-            className={`bg-gradient-to-br ${stat.bgColor} rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50`}
+            className="bg-white/80 dark:bg-black backdrop-blur-lg border border-gray-200/50 dark:border-zinc-800 rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300"
           >
             <div className="flex items-center justify-between mb-2">
               <div className={`w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br ${stat.color} rounded-xl flex items-center justify-center`}>
@@ -207,8 +208,8 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             <div>
-              <p className="text-gray-600 text-xs md:text-sm font-medium">{stat.title}</p>
-              <p className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
+              <p className="text-gray-700 dark:text-gray-300 text-xs md:text-sm font-medium">{stat.title}</p>
+              <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">{stat.value}</p>
             </div>
           </motion.div>
         ))}
@@ -219,11 +220,11 @@ const Dashboard: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-4 md:p-6"
+        className="bg-white/80 dark:bg-black backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-4 md:p-6"
       >
         {/* Tab Navigation */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex space-x-1 bg-gray-100 rounded-xl p-1">
+        <div className="flex items-center bg-mainBackground justify-between mb-6">
+          <div className="flex space-x-1 bg-gray-100 dark:bg-zinc-900 rounded-xl p-1">
             {[
               { key: 'content', label: 'Content', count: savedContent.length },
               { key: 'images', label: 'Images', count: generatedImages.length },
@@ -233,10 +234,10 @@ const Dashboard: React.FC = () => {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`px-4 py-2  rounded-lg text-sm font-medium transition-all duration-200 ${
                   activeTab === tab.key
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
+                    ? 'bg-white dark:bg-zinc-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -247,8 +248,8 @@ const Dashboard: React.FC = () => {
         
         {isLoading ? (
           <div className="text-center py-8">
-            <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your data...</p>
+            <div className="w-8 h-8  border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading your data...</p>
           </div>
         ) : (
           <div>
@@ -256,9 +257,9 @@ const Dashboard: React.FC = () => {
             {activeTab === 'content' && (
               savedContent.length === 0 ? (
                 <div className="text-center py-12">
-                  <Plus className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-600 mb-2">No content saved yet</p>
-                  <p className="text-sm text-gray-500">Start creating stories, worksheets, and more!</p>
+                  <Plus className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">No content saved yet</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Start creating stories, worksheets, and more!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -273,7 +274,7 @@ const Dashboard: React.FC = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.3, delay: index * 0.1 }}
                         whileHover={{ scale: 1.02 }}
-                        className="bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 hover:shadow-md transition-all duration-200"
+                        className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50 dark:border-gray-600/50 hover:shadow-md transition-all duration-200"
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className={`w-10 h-10 bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center flex-shrink-0`}>
@@ -319,20 +320,20 @@ const Dashboard: React.FC = () => {
                           </div>
                         </div>
                         
-                        <h3 className="font-medium text-gray-800 mb-2 line-clamp-2 text-sm">
+                        <h3 className="font-medium text-gray-800 dark:text-gray-200 mb-2 line-clamp-2 text-sm">
                           {content.title}
                         </h3>
                         
-                        <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                           <span className="capitalize">{content.type.replace('-', ' ')}</span>
                           <span>{new Date(content.createdAt).toLocaleDateString()}</span>
                         </div>
                         
                         <div className="flex items-center justify-between mt-2 text-xs">
-                          <span className="bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+                          <span className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300">
                             Grade {content.grade}
                           </span>
-                          <span className="bg-blue-100 px-2 py-1 rounded-full text-blue-600 capitalize">
+                          <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full text-blue-600 dark:text-blue-400 capitalize">
                             {content.language}
                           </span>
                         </div>
@@ -347,9 +348,9 @@ const Dashboard: React.FC = () => {
             {activeTab === 'images' && (
               generatedImages.length === 0 ? (
                 <div className="text-center py-12">
-                  <Image className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-gray-600 mb-2">No images generated yet</p>
-                  <p className="text-sm text-gray-500">Start generating educational images!</p>
+                  <ImageIcon className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">No images generated yet</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Start generating educational images!</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -360,11 +361,17 @@ const Dashboard: React.FC = () => {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                       whileHover={{ scale: 1.02 }}
-                      className="bg-white/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/50 hover:shadow-md transition-all duration-200"
+                      className="bg-white/50 dark:bg-gray-700/50 backdrop-blur-sm rounded-xl overflow-hidden border border-gray-200/50 dark:border-gray-600/50 hover:shadow-md transition-all duration-200"
                     >
                       <div className="aspect-square relative">
                         <img
-                          src={`data:image/png;base64,${image.imageBase64}`}
+                          src={
+                            image.imageUrl?.startsWith('http')
+                              ? image.imageUrl
+                              : image.imageBase64
+                              ? `data:image/png;base64,${image.imageBase64}`
+                              : ''
+                          }
                           alt={image.prompt}
                           className="w-full h-full object-cover"
                         />
@@ -374,7 +381,7 @@ const Dashboard: React.FC = () => {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => handleViewImage(image)}
-                              className="p-2 bg-white/90 rounded-lg text-gray-800 hover:bg-white transition-all duration-200"
+                              className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
                               title="View Details"
                             >
                               <Eye className="w-4 h-4" />
@@ -383,7 +390,7 @@ const Dashboard: React.FC = () => {
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => handleDeleteImage(image.id)}
-                              className="p-2 bg-white/90 rounded-lg text-red-600 hover:bg-white transition-all duration-200"
+                              className="p-2 bg-white/90 dark:bg-gray-800/90 rounded-lg text-red-600 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200"
                               title="Delete"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -392,22 +399,22 @@ const Dashboard: React.FC = () => {
                         </div>
                       </div>
                       <div className="p-3">
-                        <p className="text-sm font-medium text-gray-800 line-clamp-2 mb-1">
+                        <p className="text-sm font-medium text-gray-800 dark:text-gray-200 line-clamp-2 mb-1">
                           {image.prompt}
                         </p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
+                        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                           <span className="capitalize">{image.style}</span>
-                          <span>{image.createdAt.toLocaleDateString()}</span>
+                          <span>{new Date(image.createdAt).toLocaleDateString()}</span>
                         </div>
                         {(image.subject || image.grade) && (
                           <div className="flex items-center justify-between mt-2 text-xs">
                             {image.subject && (
-                              <span className="bg-blue-100 px-2 py-1 rounded-full text-blue-600 capitalize">
+                              <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded-full text-blue-600 dark:text-blue-400 capitalize">
                                 {image.subject}
                               </span>
                             )}
                             {image.grade && (
-                              <span className="bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+                              <span className="bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded-full text-gray-600 dark:text-gray-300">
                                 Grade {image.grade}
                               </span>
                             )}
@@ -419,15 +426,14 @@ const Dashboard: React.FC = () => {
                 </div>
               )
             )}
-
             {/* Students Tab */}
             {activeTab === 'students' && (
               <div className="space-y-4">
                 {userData?.students.length === 0 ? (
                   <div className="text-center py-12">
-                    <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p className="text-gray-600 mb-2">No students added yet</p>
-                    <p className="text-sm text-gray-500">Go to Student Tracker to add students!</p>
+                    <Users className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                    <p className="text-gray-700 dark:text-gray-300 mb-2">No students added yet</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Go to Student Tracker to add students!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -444,11 +450,11 @@ const Dashboard: React.FC = () => {
                             <user className="w-5 h-5 text-white" />
                           </div>
                           <div>
-                            <h3 className="font-medium text-gray-800">{student.name}</h3>
-                            <p className="text-sm text-gray-600">Grade {student.grade} • Roll #{student.rollNumber}</p>
+                            <h3 className="font-medium text-gray-800 dark:text-gray-200">{student.name}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Grade {student.grade} • Roll #{student.rollNumber}</p>
                           </div>
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           <p>Subjects: {student.subjects.length}</p>
                           <p>Added: {student.createdAt.toLocaleDateString()}</p>
                         </div>
@@ -464,9 +470,9 @@ const Dashboard: React.FC = () => {
               <div className="space-y-4">
                 {userData?.lessonPlans.length === 0 ? (
                   <div className="text-center py-12">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p className="text-gray-600 mb-2">No lesson plans created yet</p>
-                    <p className="text-sm text-gray-500">Go to Lesson Planner to create plans!</p>
+                    <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+                    <p className="text-gray-700 dark:text-gray-300 mb-2">No lesson plans created yet</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Go to Lesson Planner to create plans!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -483,11 +489,11 @@ const Dashboard: React.FC = () => {
                             <Calendar className="w-5 h-5 text-white" />
                           </div>
                           <div className="flex-1">
-                            <h3 className="font-medium text-gray-800 line-clamp-1">{plan.title}</h3>
-                            <p className="text-sm text-gray-600">{plan.subject} • Grade {plan.grade}</p>
+                            <h3 className="font-medium text-gray-800 dark:text-gray-200 line-clamp-1">{plan.title}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">{plan.subject} • Grade {plan.grade}</p>
                           </div>
                         </div>
-                        <div className="text-xs text-gray-500 space-y-1">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
                           <p>Week: {plan.week}</p>
                           <p>Objectives: {plan.objectives.length}</p>
                           <p>Activities: {plan.activities.length}</p>
@@ -513,38 +519,32 @@ const Dashboard: React.FC = () => {
         {selectedImage && (
           <div className="text-center py-12">
             <img
-              src={`data:image/png;base64,${selectedImage.imageBase64}`}
+              src={
+                selectedImage.imageUrl?.startsWith('http')
+                  ? selectedImage.imageUrl
+                  : selectedImage.imageBase64
+                  ? `data:image/png;base64,${selectedImage.imageBase64}`
+                  : ''
+              }
               alt={selectedImage.prompt}
-              className="max-w-full max-h-96 mx-auto rounded-lg shadow-lg mb-4"
+              className="max-w-full max-h-96 mx-auto rounded-lg shadow-lg mb-2"
             />
             <div className="text-left space-y-3">
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-1">Prompt:</h3>
-                <p className="text-gray-600 text-sm">{selectedImage.prompt}</p>
-              </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">Style:</span>
-                  <span className="ml-2 text-gray-600 capitalize">{selectedImage.style}</span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Aspect Ratio:</span>
-                  <span className="ml-2 text-gray-600">{selectedImage.aspectRatio}</span>
-                </div>
                 {selectedImage.subject && (
                   <div>
-                    <span className="font-medium text-gray-700">Subject:</span>
-                    <span className="ml-2 text-gray-600 capitalize">{selectedImage.subject}</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Subject:</span>
+                    <span className="ml-2 text-gray-600 dark:text-gray-400 capitalize">{selectedImage.subject}</span>
                   </div>
                 )}
                 {selectedImage.grade && (
                   <div>
-                    <span className="font-medium text-gray-700">Grade:</span>
-                    <span className="ml-2 text-gray-600">Grade {selectedImage.grade}</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">Grade:</span>
+                    <span className="ml-2 text-gray-600 dark:text-gray-400">Grade {selectedImage.grade}</span>
                   </div>
                 )}
               </div>
-              <div className="text-xs text-gray-500 text-center pt-2 border-t">
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center pt-2 border-t border-gray-200 dark:border-gray-600">
                 Generated on {selectedImage.createdAt.toLocaleDateString()} at {selectedImage.createdAt.toLocaleTimeString()}
               </div>
             </div>
@@ -563,13 +563,13 @@ const Dashboard: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <span className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600 capitalize">
+                <span className="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-sm text-gray-600 dark:text-gray-300 capitalize">
                   {selectedContent.type.replace('-', ' ')}
                 </span>
-                <span className="bg-blue-100 px-3 py-1 rounded-full text-sm text-blue-600">
+                <span className="bg-blue-100 dark:bg-blue-900/30 px-3 py-1 rounded-full text-sm text-blue-600 dark:text-blue-400">
                   Grade {selectedContent.grade}
                 </span>
-                <span className="bg-green-100 px-3 py-1 rounded-full text-sm text-green-600 capitalize">
+                <span className="bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full text-sm text-green-600 dark:text-green-400 capitalize">
                   {selectedContent.language}
                 </span>
               </div>
@@ -578,7 +578,7 @@ const Dashboard: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handlePlayAudio(selectedContent)}
-                  className="flex items-center space-x-2 bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-all duration-200"
+                  className="flex items-center space-x-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-2 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200"
                 >
                   {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                   <span>{isPlaying ? 'Stop' : 'Play'}</span>
@@ -587,7 +587,7 @@ const Dashboard: React.FC = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleDownloadPDF(selectedContent)}
-                  className="flex items-center space-x-2 bg-purple-100 text-purple-700 px-3 py-2 rounded-lg hover:bg-purple-200 transition-all duration-200"
+                  className="flex items-center space-x-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-2 rounded-lg hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200"
                 >
                   <Download className="w-4 h-4" />
                   <span>PDF</span>
@@ -595,13 +595,13 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
             
-            <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
-              <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 max-h-96 overflow-y-auto">
+              <pre className="whitespace-pre-wrap text-sm text-gray-800 dark:text-gray-200 font-sans leading-relaxed">
                 {selectedContent.content}
               </pre>
             </div>
             
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
               Created on{" "}
               {new Date(
                 selectedContent.createdAt?.toDate?.() || selectedContent.createdAt

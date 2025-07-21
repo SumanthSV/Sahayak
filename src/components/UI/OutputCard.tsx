@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Download, 
   Copy, 
@@ -10,16 +10,23 @@ import {
   Image as ImageIcon,
   Check,
   Eye,
-  Edit3
+  Edit3,
+  Lightbulb,
+  MessageSquare,
+  Camera
 } from 'lucide-react';
 import { generatePDF } from '../../utils/pdfGenerator';
+import html2canvas from 'html2canvas';
 import toast from 'react-hot-toast';
 
 interface OutputCardProps {
   title: string;
-  content: string;
+  content?: string;
+  suggestions?: string;
+  tips?: string;
+  imageBase64?: string;
   timestamp?: Date;
-  type: 'story' | 'worksheet' | 'concept' | 'visual-aid';
+  type: 'story' | 'worksheet' | 'concept' | 'visual-aid' | 'assessment';
   onSave?: () => void;
   onRegenerate?: () => void;
   onEdit?: () => void;
@@ -32,6 +39,9 @@ interface OutputCardProps {
 export const OutputCard: React.FC<OutputCardProps> = ({
   title,
   content,
+  suggestions,
+  tips,
+  imageBase64,
   timestamp = new Date(),
   type,
   onSave,
@@ -42,12 +52,29 @@ export const OutputCard: React.FC<OutputCardProps> = ({
   additionalData,
   className = ""
 }) => {
-  const [activeTab, setActiveTab] = useState<'content' | 'tips' | 'suggestions'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'suggestions' | 'tips' | 'image'>('content');
   const [copied, setCopied] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Determine available tabs
+  const availableTabs = [
+    { key: 'content', label: 'Content', icon: FileText, available: !!content },
+    { key: 'suggestions', label: 'Suggestions', icon: Lightbulb, available: !!suggestions },
+    { key: 'tips', label: 'Tips', icon: MessageSquare, available: !!tips },
+    { key: 'image', label: 'Image', icon: ImageIcon, available: !!imageBase64}
+  ].filter(tab => tab.available);
+
+  // Set initial active tab to first available
+  React.useEffect(() => {
+    if (availableTabs.length > 0 && !availableTabs.find(tab => tab.key === activeTab)) {
+      setActiveTab(availableTabs[0].key as any);
+    }
+  }, [availableTabs, activeTab]);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(content);
+      const textToCopy = getActiveContent();
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       toast.success('Content copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
@@ -56,94 +83,107 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     }
   };
 
+  const getActiveContent = () => {
+    switch (activeTab) {
+      case 'suggestions': return suggestions || '';
+      case 'tips': return tips || '';
+      case 'image': return imageBase64 || '';
+      default: return content || '';
+    }
+  };
+
   const handleDownloadPDF = () => {
-    // Extract language from additionalData, default to 'en'
+    // Combine all available content for PDF
+    let pdfContent = '';
+    if (content) pdfContent += `CONTENT:\n${content}\n\n`;
+    if (suggestions) pdfContent += `SUGGESTIONS:\n${suggestions}\n\n`;
+    if (tips) pdfContent += `TIPS:\n${tips}\n\n`;
+    if (imageBase64) pdfContent += `IMAGE URL:\n${imageBase64}\n\n`;
+
     const language = additionalData?.language || 'en';
-    generatePDF(content, `${type}_${title.replace(/\s+/g, '_')}`, language);
+    generatePDF(pdfContent, `${type}_${title.replace(/\s+/g, '_')}`, language);
     toast.success('PDF downloaded successfully!');
   };
 
-  const handleDownloadImage = () => {
-    // Create a canvas to render the content as image
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const handleDownloadCardAsImage = async () => {
+    if (!cardRef.current) return;
 
-    canvas.width = 800;
-    canvas.height = 600;
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      const link = document.createElement('a');
+      link.download = `${type}_${title.replace(/\s+/g, '_')}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+      
+      toast.success('Card image downloaded successfully!');
+    } catch (error) {
+      console.error('Error capturing card:', error);
+      toast.error('Failed to download card image');
+    }
+  };
+
+  const handleDownloadImageOnly = () => {
+    if (!imageBase64) return;
+
+    const link = document.createElement('a');
+    link.download = `${type}_image_${Date.now()}.png`;
+    link.href = imageBase64 || imageUrl;
+    link.target = '_blank';
+    link.click();
     
-    // White background
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Add content
-    ctx.fillStyle = '#1f2937';
-    ctx.font = '16px Inter, sans-serif';
-    
-    const lines = content.split('\n');
-    let y = 50;
-    lines.forEach(line => {
-      if (y < canvas.height - 50) {
-        ctx.fillText(line.substring(0, 80), 50, y);
-        y += 25;
-      }
-    });
-    
-    // Download as PNG
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${type}_${title.replace(/\s+/g, '_')}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success('Image downloaded successfully!');
-      }
-    });
+    toast.success('Image downloaded successfully!');
   };
 
   const getCardStyle = () => {
     switch (type) {
       case 'story':
-        return 'bg-gradient-to-br from-purple-50 to-pink-50 border-l-4 border-purple-500';
+        return 'border-l-4 border-purple-500 dark:border-purple-400';
       case 'worksheet':
-        return 'bg-gradient-to-br from-blue-50 to-cyan-50 border-l-4 border-blue-500';
+        return 'border-l-4 border-blue-500 dark:border-blue-400';
       case 'concept':
-        return 'bg-gradient-to-br from-green-50 to-emerald-50 border-l-4 border-green-500';
+        return 'border-l-4 border-green-500 dark:border-green-400';
       case 'visual-aid':
-        return 'bg-gradient-to-br from-orange-50 to-red-50 border-l-4 border-orange-500';
+        return 'border-l-4 border-orange-500 dark:border-orange-400';
+      case 'assessment':
+        return 'border-l-4 border-red-500 dark:border-red-400';
       default:
-        return 'bg-gradient-to-br from-gray-50 to-slate-50 border-l-4 border-gray-500';
+        return 'border-l-4 border-gray-500 dark:border-gray-400';
     }
   };
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-white rounded-2xl shadow-xl border border-gray-200/50 overflow-hidden ${className}`}
+      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden ${getCardStyle()} ${className}`}
     >
       {/* Header */}
-      <div className="p-6 border-b border-gray-200/50 bg-white/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">{title}</h3>
-            <div className="flex items-center text-sm text-gray-500">
-              <Clock className="w-4 h-4 mr-1" />
+      <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1 truncate">{title}</h3>
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+              <Clock className="w-4 h-4 mr-1 flex-shrink-0" />
               <span>{timestamp.toLocaleString()}</span>
             </div>
           </div>
           
           {/* Action Buttons */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {isEditable && onEdit && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onEdit}
-                className="p-2 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-all duration-200"
+                className="p-2 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200"
                 title="Edit Content"
               >
                 <Edit3 className="w-4 h-4" />
@@ -156,8 +196,8 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               onClick={handleCopy}
               className={`p-2 rounded-xl transition-all duration-200 ${
                 copied 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
               title="Copy Content"
             >
@@ -168,7 +208,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleDownloadPDF}
-              className="p-2 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition-all duration-200"
+              className="p-2 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-all duration-200"
               title="Download PDF"
             >
               <FileText className="w-4 h-4" />
@@ -177,12 +217,24 @@ export const OutputCard: React.FC<OutputCardProps> = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={handleDownloadImage}
-              className="p-2 rounded-xl bg-purple-100 text-purple-600 hover:bg-purple-200 transition-all duration-200"
-              title="Download as Image"
+              onClick={handleDownloadCardAsImage}
+              className="p-2 rounded-xl bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all duration-200"
+              title="Download Card as Image"
             >
-              <ImageIcon className="w-4 h-4" />
+              <Camera className="w-4 h-4" />
             </motion.button>
+
+            {imageBase64 && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDownloadImageOnly}
+                className="p-2 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-all duration-200"
+                title="Download Image Only"
+              >
+                <ImageIcon className="w-4 h-4" />
+              </motion.button>
+            )}
             
             {onSave && (
               <motion.button
@@ -190,7 +242,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={onSave}
                 disabled={isSaving}
-                className="p-2 rounded-xl bg-green-100 text-green-600 hover:bg-green-200 transition-all duration-200 disabled:opacity-50"
+                className="p-2 rounded-xl bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 transition-all duration-200 disabled:opacity-50"
                 title="Save Content"
               >
                 <Save className="w-4 h-4" />
@@ -202,7 +254,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onRegenerate}
-                className="p-2 rounded-xl bg-orange-100 text-orange-600 hover:bg-orange-200 transition-all duration-200"
+                className="p-2 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all duration-200"
                 title="Regenerate Content"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -212,82 +264,88 @@ export const OutputCard: React.FC<OutputCardProps> = ({
         </div>
         
         {/* Tabs */}
-        {additionalData && (
-          <div className="flex space-x-1 mt-4 bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('content')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                activeTab === 'content'
-                  ? 'bg-white text-gray-800 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              Content
-            </button>
-            {additionalData.tips && (
+        {availableTabs.length > 1 && (
+          <div className="flex space-x-1 mt-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 overflow-x-auto">
+            {availableTabs.map((tab) => (
               <button
-                onClick={() => setActiveTab('tips')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'tips'
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? 'bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
                 }`}
               >
-                Tips
+                <tab.icon className="w-4 h-4" />
+                <span>{tab.label}</span>
               </button>
-            )}
-            {additionalData.suggestions && (
-              <button
-                onClick={() => setActiveTab('suggestions')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                  activeTab === 'suggestions'
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-800'
-                }`}
-              >
-                Suggestions
-              </button>
-            )}
+            ))}
           </div>
         )}
       </div>
       
       {/* Content */}
-      <div className={`p-2 ${getCardStyle()}`}>
-        {activeTab === 'content' && (
-          <div className="prose prose-sm max-w-none">
-            {/* Scrollable content container with chalkboard styling */}
-            <div className="max-h-96 overflow-y-auto bg-slate-800 text-green-400 p-4 rounded-lg border-2 border-slate-600 font-mono text-sm leading-relaxed scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
-              <pre className="whitespace-pre-wrap">
-                {content}
-              </pre>
-            </div>
-          </div>
-        )}
-        
-        {activeTab === 'tips' && additionalData?.tips && (
-          <div className="max-h-96 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {additionalData.tips.map((tip: string, index: number) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-xs font-bold">{index + 1}</span>
-                </div>
-                <p className="text-gray-700 text-sm">{tip}</p>
+      <div className="p-4 sm:p-6">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
+          >
+            {activeTab === 'image' && imageBase64 && (
+              <div className="text-center">
+                <img
+                  src={imageBase64}
+                  alt={title}
+                  className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    toast.error('Failed to load image');
+                  }}
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  Click the image download button above to save this image
+                </p>
               </div>
-            ))}
-          </div>
-        )}
-        
-        {activeTab === 'suggestions' && additionalData?.suggestions && (
-          <div className="max-h-96 overflow-y-auto space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {additionalData.suggestions.map((suggestion: string, index: number) => (
-              <div key={index} className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0" />
-                <p className="text-gray-700 text-sm">{suggestion}</p>
+            )}
+            {activeTab === 'content' && content && (
+              <div className="bg-slate-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-4 rounded-lg border-2 border-slate-600 dark:border-gray-600 font-mono text-sm leading-relaxed">
+                <pre className="whitespace-pre-wrap">
+                  {content}
+                </pre>
               </div>
-            ))}
-          </div>
-        )}
+            )}
+            
+            {activeTab === 'suggestions' && suggestions && (
+              <div className="space-y-3">
+                {suggestions.split('\n').filter(line => line.trim()).map((suggestion, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">{suggestion}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {activeTab === 'tips' && tips && (
+              <div className="space-y-3">
+                {tips.split('\n').filter(line => line.trim()).map((tip, index) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="w-6 h-6 bg-yellow-500 dark:bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <span className="text-white text-xs font-bold">{index + 1}</span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 text-sm">{tip}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            
+          </motion.div>
+        </AnimatePresence>
       </div>
     </motion.div>
   );

@@ -173,7 +173,7 @@ const WorksheetGenerator: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="h-screen bg-white dark:bg-black overflow-hidden">
       <LoadingTeacher 
         isVisible={isGenerating}
         message="Creating differentiated worksheets... Please wait ⏳"
@@ -184,43 +184,52 @@ const WorksheetGenerator: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 px-6 py-8"
+        className="bg-white/80 dark:bg-zinc-950 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-6 py-6"
       >
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center"
+              className="w-12 h-12  rounded-2xl flex items-center justify-center"
             >
-              <FileText className="w-8 h-8 text-white" />
+              <FileText className="w-6 h-6 text-white" />
             </motion.div>
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
                 Multi-Grade Worksheet Generator
               </h1>
-              <p className="text-gray-600 text-lg mt-2">Create differentiated worksheets for multiple grade levels</p>
+              <p className="text-gray-600 dark:text-gray-400">Create differentiated worksheets for multiple grade levels</p>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 min-h-[calc(100vh-200px)]">
+      {/* Main Content - Fixed Layout */}
+      <div className="h-[calc(100vh-140px)] max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
           {/* Left Panel - Input Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="space-y-6"
+            className="space-y-4 overflow-y-auto pr-2"
           >
-            <InputCard title="Worksheet Configuration" icon={Target}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField label="Subject" icon={BookOpen} required>
+            {/* Configuration Card */}
+            <div className="bg-white/90 dark:bg-black backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                  <Target className="w-4 h-4 text-white" />
+                </div>
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Configuration</h2>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject</label>
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100"
                   >
                     {subjects.map((sub) => (
                       <option key={sub.value} value={sub.value}>
@@ -228,13 +237,14 @@ const WorksheetGenerator: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                </InputField>
+                </div>
 
-                <InputField label="Output Language" icon={Globe} required>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Language</label>
                   <select
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl   bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100"
                   >
                     {languages.map((lang) => (
                       <option key={lang.value} value={lang.value}>
@@ -242,80 +252,73 @@ const WorksheetGenerator: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                </InputField>
+                </div>
               </div>
               
-              <InputField 
-                label="Topic/Concept" 
-                tooltip="Enter the main topic for the worksheet"
-                required
-              >
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topic/Concept</label>
                 <input
                   type="text"
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="Enter the topic for the worksheet..."
-                  className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100"
                 />
-              </InputField>
+              </div>
               
-              <InputField label="Difficulty Level" icon={Settings}>
-                <select
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                >
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                </select>
-              </InputField>
-              
-              <InputField label="Select Grades" icon={GraduationCap} required>
-                <select
-                  multiple
-                  value={selectedGrades}
-                  onChange={(e) => setSelectedGrades(Array.from(e.target.selectedOptions, option => option.value))}
-                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm h-32"
-                >
-                  {grades.map((grade) => (
-                    <option key={grade.value} value={grade.value}>
-                      {grade.label}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">Hold Ctrl/Cmd to select multiple grades</p>
-              </InputField>
-              
-              <InputField label="Question Types (Optional)" icon={List}>
-                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-white/50 backdrop-blur-sm">
-                  {questionTypeOptions.map((type) => (
-                    <label key={type.value} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={questionTypes.includes(type.value)}
-                        onChange={() => handleQuestionTypeToggle(type.value)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{type.label}</span>
-                    </label>
-                  ))}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty</label>
+                  <select
+                    value={difficulty}
+                    onChange={(e) => setDifficulty(e.target.value as 'easy' | 'medium' | 'hard')}
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-zinc-950 text-gray-900 dark:text-gray-100"
+                  >
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                  </select>
                 </div>
-              </InputField>
-            </InputCard>
-            
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Grades</label>
+                  <div className="flex flex-wrap gap-2 p-3 border border-gray-200 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 max-h-20 overflow-y-auto">
+                    {grades.slice(0, 8).map((grade) => (
+                      <button
+                        key={grade.value}
+                        onClick={() => handleGradeToggle(grade.value)}
+                        className={`px-2 py-1 text-xs rounded-lg transition-all duration-200 ${
+                          selectedGrades.includes(grade.value)
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-500'
+                        }`}
+                      >
+                        {grade.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Image Upload Card */}
-            <InputCard title="Reference Image (Optional)" icon={Image}>
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center">
+            <div className="bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8  rounded-xl flex items-center justify-center">
+                  <Image className="w-4 h-4 text-white" />
+                </div>
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Reference Image</h2>
+              </div>
+              
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-4 text-center">
                 {uploadedImage ? (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <img
                       src={uploadedImage}
                       alt="Uploaded reference"
-                      className="max-w-full h-32 object-contain mx-auto rounded-lg"
+                      className="max-w-full h-24 object-contain mx-auto rounded-lg"
                     />
-                    <p className="text-sm text-gray-600">Reference image uploaded!</p>
-                    <label className="cursor-pointer bg-blue-100 text-blue-700 px-4 py-2 rounded-xl hover:bg-blue-200 transition-all duration-200 inline-block">
+                    <label className="cursor-pointer bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-xl hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-all duration-200 inline-block">
                       Change Image
                       <input
                         type="file"
@@ -326,11 +329,11 @@ const WorksheetGenerator: React.FC = () => {
                     </label>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    <Upload className="w-8 h-8 text-gray-400 mx-auto" />
+                  <div className="space-y-3">
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto" />
                     <div>
-                      <p className="text-gray-600 mb-2">Upload a reference image (optional)</p>
-                      <label className="cursor-pointer bg-blue-500 text-white px-6 py-3 rounded-xl hover:bg-blue-600 transition-all duration-200 inline-block">
+                      <p className="text-gray-600 dark:text-gray-400 mb-2 text-sm">Upload reference image (optional)</p>
+                      <label className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 transition-all duration-200 inline-block">
                         Choose Image
                         <input
                           type="file"
@@ -340,21 +343,21 @@ const WorksheetGenerator: React.FC = () => {
                         />
                       </label>
                     </div>
-                    <p className="text-sm text-gray-500">
-                      Supported formats: JPG, PNG, PDF
-                    </p>
                   </div>
                 )}
               </div>
               
-              <GenerateButton
-                onClick={handleGenerateWorksheet}
-                isLoading={isGenerating}
-                disabled={!topic.trim() || selectedGrades.length === 0}
-              >
-                Generate Worksheets
-              </GenerateButton>
-            </InputCard>
+              <div className="mt-4">
+                <GenerateButton
+                  onClick={handleGenerateWorksheet}
+                  isLoading={isGenerating}
+                  disabled={!topic.trim() || selectedGrades.length === 0}
+                  size="md"
+                >
+                  Generate Worksheets
+                </GenerateButton>
+              </div>
+            </div>
           </motion.div>
 
           {/* Right Panel - Output */}
@@ -362,19 +365,19 @@ const WorksheetGenerator: React.FC = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-6"
+            className="flex flex-col h-full"
           >
             {Object.keys(worksheetContent).length > 0 ? (
-              <div className="space-y-4">
+              <div className="flex flex-col h-full space-y-4">
                 {/* Grade Selector */}
-                <div className="bg-white rounded-xl p-4 shadow-lg border border-gray-200/50">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Select Grade to View
                   </label>
                   <select
                     value={selectedWorksheet}
                     onChange={(e) => setSelectedWorksheet(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
                     {Object.keys(worksheetContent).map((grade) => (
                       <option key={grade} value={grade}>
@@ -384,24 +387,39 @@ const WorksheetGenerator: React.FC = () => {
                   </select>
                 </div>
                 
-                {/* Worksheet Output */}
-                <AnimatePresence mode="wait">
-                  {selectedWorksheet && worksheetContent[selectedWorksheet] && (
-                    <OutputCard
-                      key={selectedWorksheet}
-                      title={`${subject} Worksheet - Grade ${grades.find(g => g.value === selectedWorksheet)?.label}`}
-                      content={worksheetContent[selectedWorksheet]}
-                      type="worksheet"
-                      onSave={handleSave}
-                      onRegenerate={handleRegenerate}
-                      isSaving={isSaving}
-                      className="h-full"
-                    />
-                  )}
-                </AnimatePresence>
+                {/* Worksheet Output - Fixed Height */}
+                <div className="flex-1 min-h-0">
+                  <AnimatePresence mode="wait">
+                    {selectedWorksheet && worksheetContent[selectedWorksheet] && (
+                      <div className="h-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                        <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                              {subject} Worksheet - Grade {grades.find(g => g.value === selectedWorksheet)?.label}
+                            </h3>
+                            <button
+                              onClick={handleSave}
+                              disabled={isSaving}
+                              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all duration-200 disabled:opacity-50"
+                            >
+                              {isSaving ? 'Saving...' : 'Save'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-4 h-[calc(100%-80px)] overflow-y-auto">
+                          <div className="bg-slate-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-4 rounded-lg border-2 border-slate-600 dark:border-gray-600 font-mono text-sm leading-relaxed">
+                            <pre className="whitespace-pre-wrap">
+                              {worksheetContent[selectedWorksheet]}
+                            </pre>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             ) : (
-              <div className="bg-white rounded-2xl shadow-xl border border-gray-200/50 p-8 h-full flex items-center justify-center">
+              <div className="h-full bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
                     animate={{ 
@@ -413,13 +431,13 @@ const WorksheetGenerator: React.FC = () => {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="w-24 h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-2xl flex items-center justify-center mx-auto mb-6"
+                    className="w-20 h-20 bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 rounded-2xl flex items-center justify-center mx-auto mb-6"
                   >
-                    <FileText className="w-12 h-12 text-blue-500" />
+                    <FileText className="w-10 h-10 text-blue-500 dark:text-blue-400" />
                   </motion.div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">Ready to Create Worksheets</h3>
-                  <p className="text-gray-600 mb-4">Your differentiated worksheets will appear here</p>
-                  <p className="text-sm text-gray-500">Fill in the form and click generate to get started</p>
+                  <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Ready to Create Worksheets</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">Your differentiated worksheets will appear here</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Fill in the form and click generate to get started</p>
                 </div>
               </div>
             )}

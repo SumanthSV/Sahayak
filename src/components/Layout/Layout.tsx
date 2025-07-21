@@ -14,7 +14,11 @@ const Layout: React.FC = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarOpen(true);
+      }
     };
 
     checkMobile();
@@ -23,7 +27,7 @@ const Layout: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
       {/* Skip Link for Screen Readers */}
       <a href="#main-content" className="skip-link">
         Skip to main content
@@ -36,7 +40,15 @@ const Layout: React.FC = () => {
       <ResponsiveSidebar isMobile={isMobile} />
 
       {/* Main Content Area */}
-      <div className={`flex flex-col ${!isMobile ? 'ml-72' : ''} min-h-screen`}>
+      <motion.div 
+        className={`flex flex-col min-h-screen transition-all duration-300 ${
+          !isMobile ? 'ml-72' : ''
+        }`}
+        animate={{
+          marginLeft: !isMobile ? (sidebarOpen ? 288 : 0) : 0
+        }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+      >
         {/* Header */}
         <Header />
         
@@ -51,12 +63,12 @@ const Layout: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="h-full container-responsive py-4"
+            className="h-full container-responsive py-4 bg-transparent"
           >
             <Outlet />
           </motion.div>
         </main>
-      </div>
+      </motion.div>
 
       {/* Persistent Voice Button */}
       <VoiceButton 
