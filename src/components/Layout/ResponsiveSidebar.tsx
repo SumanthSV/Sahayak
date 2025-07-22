@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import Logo2 from '../../assets/Logo2.png'
 import { 
 
   FileText, 
@@ -14,6 +15,8 @@ import {
   Gamepad2,
   Sparkles,
   ChevronLeft,
+  Menu,
+  Text,
   ChevronRight,
   ImagePlus,
 } from 'lucide-react';
@@ -74,17 +77,16 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
       `}
     >
       {/* Header */}
-      <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
+      <div className="p-[0.8rem] border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="flex items-center space-x-3"
           >
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg">
-              {/* <Sparkles className="w-6 h-6 text-white" />
-               */}
+            <div className={` ${isCollapsed ?"dipla" :"w-8 h-8"}  bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg`}>
+              <img src={Logo2} className='' alt="" />
             </div>
-            <AnimatePresence>
+            {/* <AnimatePresence> */}
               {!isCollapsed && (
                 <motion.div
                   initial={{ opacity: 0, width: 0 }}
@@ -93,26 +95,24 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
                   transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <h1 className="text-xl font-bold ">
+                  <h1 className="text-md font-bold ">
                     Sahayak AI
                   </h1>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Teaching Assistant</p>
+                  {/* <p className="text-xs text-gray-600 dark:text-gray-400">Teaching Assistant</p> */}
                 </motion.div>
               )}
-            </AnimatePresence>
+            {/* </AnimatePresence> */}
           </motion.div>
           
           {!isMobile && (
             <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200"
+              className=" rounded-xl bg-gray-100 p-1 dark:bg-transparent hover:bg-gray-200 dark:hover:bg-zinc-900 transition-all duration-200"
             >
               {isCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <Menu className="w-5 h-5 text-gray-400 dark:text-gray-200" />
               ) : (
-                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <Text className="w-5 h-5 text-gray-400 dark:text-gray-200" />
               )}
             </motion.button>
           )}

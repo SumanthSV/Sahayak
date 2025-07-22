@@ -227,7 +227,7 @@ export const generateVisualAidWithImage = onCall(async (request) => {
       difficulty: "Easy",
     };
   } catch (error) {
-    console.error("❌ Gemini image generation failed:", error?.message || error);
+    console.error("❌ Gemini image generation failed:",  error);
     throw new HttpsError("internal", "Failed to generate image from Gemini.");
   }
 });
@@ -296,7 +296,7 @@ export const generateEducationalImage = onCall(async (request) => {
       difficulty: "Easy",
     };
   } catch (error) {
-    console.error("❌ Gemini Educational image generation failed:", error?.message || error);
+    console.error("❌ Gemini Educational image generation failed:", error);
     throw new HttpsError("internal", "Failed to generate image from Gemini.");
   }
 });
@@ -560,10 +560,15 @@ Use Indian life scenes like school, street vendors, temples, nature, etc. Keep l
 });
 
 // Lesson Plan Suggestions
-export const generateLessonSuggestions = onCall(async (request) => {
+export const generateLessonImprovements = onCall(async (request) => {
   const { title, subject, grade, objectives, activities } = request.data;
-  
+
+  if (!title || !subject || !grade || !objectives || !activities) {
+    throw new HttpsError("invalid-argument", "Missing required input fields.");
+  }
+  console.log("generating lesson plan");
   try {
+    
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const prompt = `
@@ -581,7 +586,12 @@ export const generateLessonSuggestions = onCall(async (request) => {
         "additionalActivities": ["activity 1", "activity 2"],
         "resources": ["resource 1", "resource 2"],
         "assessmentIdeas": ["assessment 1", "assessment 2"],
-        "nextLessonTopics": ["topic 1", "topic 2"]
+        "enhancedObjectives": ["objective 1", "objective 2"],
+        "recommendedResources": ["resource 1", "resource 2"],
+        "assessmentEnhancements": ["enhancement 1", "enhancement 2"],
+        "timeManagementTips": ["tip 1", "tip 2"],
+        "additionalActivities": ["Activity 1", "Activity 2"],
+        "technologyIntegration": ["integration 1", "integration 2"]
       }
       
       Focus on:
@@ -597,9 +607,14 @@ export const generateLessonSuggestions = onCall(async (request) => {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    
+    console.log("results: "+result);
+    console.log("response: "+response);
     try {
-      return JSON.parse(response.text());
+      let raw = response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      raw = raw.replace(/```json\s*([\s\S]*?)```/, '$1').trim();
+      const parsed = json5.parse(raw);
+      console.log("parsed "+parsed);
+      return parsed;
     } catch {
       // Fallback suggestions
       return {

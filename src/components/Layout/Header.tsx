@@ -90,7 +90,7 @@ const Header: React.FC<ModernHeaderProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed w-full top-0 backdrop-blur-xl bg-white/90 dark:bg-transparent border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-4  z-90 shadow-lg"
+        className="fixed w-[80%] top-0 backdrop-blur-xl bg-white/90 dark:bg-transparent border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-2  z-50 shadow-lg"
       >
         <div className="flex items-center justify-between">
           {/* Left Section */}
@@ -109,14 +109,7 @@ const Header: React.FC<ModernHeaderProps> = ({
             )}
 
             {/* Search Bar */}
-            <div className="relative max-w-md hidden sm:block">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-200 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search anything magical..."
-                className="pl-12 pr-4 py-3 bg-gray-50/50 dark:bg-transparent backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl outline-none w-full transition-all duration-200 text-gray-900 dark:text-gray-100"
-              />
-            </div>
+            
           </div>
 
           {/* Right Section */}
@@ -125,10 +118,10 @@ const Header: React.FC<ModernHeaderProps> = ({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="p-3 rounded-xl bg-gray-100 dark:bg-transparent dark:border dark:border-zinc-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 relative"
+              className="p-2 rounded-lg bg-gray-100 dark:bg-transparent dark:border dark:border-zinc-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 relative"
               title="Notifications"
             >
-              <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <Bell className="w-4 h-4 text-gray-600 dark:text-gray-400" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
             </motion.button>
 
@@ -138,9 +131,9 @@ const Header: React.FC<ModernHeaderProps> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="flex items-center space-x-2 px-3 py-3 rounded-xl bg-gray-100 dark:bg-transparent hover:bg-gray-200 dark:border dark:border-zinc-800 transition-all duration-200"
+                className="flex items-center space-x-2 px-2 py-2 rounded-xl bg-gray-100 dark:bg-transparent hover:bg-gray-200 dark:border dark:border-zinc-800 transition-all duration-200"
               >
-                <Globe className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                <Globe className="w-4 h-4 text-gray-600 dark:text-gray-300" />
                 {!isMobile && (
                   <>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -185,7 +178,7 @@ const Header: React.FC<ModernHeaderProps> = ({
             <button
              
               onClick={toggleDarkMode}
-              className="p-3 rounded-xl bg-gray-100 dark:border dark:border-zinc-800 dark:bg-transparent hover:bg-gray-200  transition-all duration-200"
+              className="p-2 rounded-xl bg-gray-100 dark:border dark:border-zinc-800 dark:bg-transparent hover:bg-gray-200  transition-all duration-200"
               title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {/* <AnimatePresence mode="wait"> */}
@@ -197,7 +190,7 @@ const Header: React.FC<ModernHeaderProps> = ({
                     exit={{ rotate: 90, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Sun className="w-5 h-5 text-yellow-600 " />
+                    <Sun className="w-4 h-4 text-yellow-600 " />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -207,7 +200,7 @@ const Header: React.FC<ModernHeaderProps> = ({
                     exit={{ rotate: -90, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <Moon className="w-5 h-5 text-gray-600" />
+                    <Moon className="w-4 h-4 text-gray-600" />
                   </motion.div>
                 )}
               {/* </AnimatePresence> */}
@@ -219,7 +212,7 @@ const Header: React.FC<ModernHeaderProps> = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-3 p-3 rounded-xl bg-gray-100 dark:bg-transparent dark:border dark:border-zinc-800 hover:bg-gray-200  transition-all duration-200"
+                className="flex items-center space-x-1 p-1 rounded-xl bg-gray-100 dark:bg-transparent dark:border dark:border-zinc-800 hover:bg-gray-200  transition-all duration-200"
               >
                 <div className="w-8 h-8  rounded-xl flex items-center justify-center shadow-lg">
                   <User className="w-4 h-4 text-white" />
@@ -227,12 +220,10 @@ const Header: React.FC<ModernHeaderProps> = ({
                 {!isMobile && (
                   <>
                     <div className="text-left">
-                      <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <div className="text-xs font-medium text-gray-700 dark:text-gray-300">
                         {user?.displayName || 'Teacher'}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Online
-                      </div>
+                     
                     </div>
                     <ChevronDown className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                   </>

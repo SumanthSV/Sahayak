@@ -26,7 +26,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       case 'secondary':
         return 'bg-gradient-to-r from-gray-500 to-slate-500 hover:from-gray-600 hover:to-slate-600';
       default:
-        return 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 hover:shadow-lg hover:shadow-green-500/25';
+        return 'border border-gray-900 dark:border-zinc-500 hover:from-green-600 hover:to-emerald-600 hover:shadow-lg hover:shadow-green-500/25';
     }
   };
 
@@ -37,7 +37,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
       case 'md':
         return 'py-3 px-6 text-base';
       default:
-        return 'py-4 px-8 text-lg';
+        return 'py-2 px-8 text-lg';
     }
   };
 
@@ -71,7 +71,7 @@ export const GenerateButton: React.FC<GenerateButtonProps> = ({
         ) : (
           <Sparkles className="w-5 h-5" />
         )}
-        <span>{children}</span>
+        <span className="dark:text-zinc-200 text-zinc-800 text-md">{children}</span>
       </div>
       
       {/* Shimmer effect */}

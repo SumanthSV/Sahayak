@@ -179,7 +179,8 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="p-4 mt-20 md:p-6 max-w-7xl mx-auto min-h-screen  dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black">
+    <div  className="p-4  md:p-6 max-w-7xl mx-auto min-h-screen  dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black">
+    <div className="mt-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -615,6 +616,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
       </Modal>
+    </div>
     </div>
   );
 };

@@ -21,7 +21,7 @@ export const InputField: React.FC<InputFieldProps> = ({
     <div className="space-y-2">
       <div className="flex items-center space-x-2">
         {Icon && <Icon className="w-4 h-4 text-gray-600" />}
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-gray-700 dark:text-zinc-400">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
@@ -57,7 +57,7 @@ export const InputCard: React.FC<InputCardProps> = ({
       initial={{ opacity: 0, x: -20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-white rounded-2xl shadow-xl border border-gray-200/50 p-6 ${className}`}
+      className={`bg-transparent backdrop-blur-xl rounded-2xl shadow-xl border border-gray-200/50 p-6 ${className}`}
     >
       <div className="flex items-center space-x-3 mb-6">
         {Icon && (
@@ -65,7 +65,7 @@ export const InputCard: React.FC<InputCardProps> = ({
             <Icon className="w-5 h-5 text-white" />
           </div>
         )}
-        <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
+        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{title}</h2>
       </div>
       
       <div className="space-y-6">

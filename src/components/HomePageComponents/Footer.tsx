@@ -35,7 +35,7 @@ export default function Footer() {
   ]
 
   return (
-    <footer id="contact" className="bg-gray-900 dark:bg-black text-white">
+    <footer id="contact" className="bg-white dark:bg-black text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Logo and description */}
@@ -51,9 +51,9 @@ export default function Footer() {
               <p className="text-gray-400">
                 <span className="font-medium">Email:</span> hello@eduai.com
               </p>
-              <p className="text-gray-400">
+              {/* <p className="text-gray-400">
                 <span className="font-medium">Phone:</span> +91 98765 43210
-              </p>
+              </p> */}
             </div>
           </div>
 
@@ -75,8 +75,8 @@ export default function Footer() {
         </div>
 
         {/* Social icons and copyright */}
-        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex space-x-6 mb-4 md:mb-0">
+        <div className="border-t border-gray-800 mt-12 pt-8 flex flex-col md:flex-row justify-center items-center">
+          {/* <div className="flex space-x-6 mb-4 md:mb-0">
             {socialIcons.map((social) => (
               <a
                 key={social.name}
@@ -87,7 +87,7 @@ export default function Footer() {
                 {social.icon}
               </a>
             ))}
-          </div>
+          </div> */}
           <div className="text-gray-400 text-sm">
             © 2025 EduAI •{" "}
             <a href="#" className="hover:text-purple-400 transition-colors">

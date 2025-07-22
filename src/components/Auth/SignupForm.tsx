@@ -77,7 +77,7 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
   };
 
   return (
-    <div className="h-screen w-screen fixed inset-0 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-black dark:via-purple-950 dark:to-black">
+    <div className="h-screen w-screen fixed inset-0 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-black dark:via-purple-950 dark:to-black ">
       {/* Animated Background */}
       <AnimatedBackground />
       

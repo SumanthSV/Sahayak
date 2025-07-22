@@ -25,7 +25,7 @@ interface OutputCardProps {
   content?: string;
   suggestions?: string;
   tips?: string;
-  imageUrl?: string;
+  imageBase64?: string;
   timestamp?: Date;
   type: 'story' | 'worksheet' | 'concept' | 'visual-aid' | 'assessment';
   onSave?: () => void;
@@ -42,7 +42,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
   content,
   suggestions,
   tips,
-  imageUrl,
+  imageBase64,
   timestamp = new Date(),
   type,
   onSave,
@@ -62,7 +62,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     { key: 'content', label: 'Content', icon: FileText, available: !!content },
     { key: 'suggestions', label: 'Suggestions', icon: Lightbulb, available: !!suggestions },
     { key: 'tips', label: 'Tips', icon: MessageSquare, available: !!tips },
-    { key: 'image', label: 'Image', icon: ImageIcon, available: !!imageUrl }
+    { key: 'image', label: 'Image', icon: ImageIcon, available: !!imageBase64 }
   ].filter(tab => tab.available);
 
   // Set initial active tab to first available
@@ -88,7 +88,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     switch (activeTab) {
       case 'suggestions': return suggestions || '';
       case 'tips': return tips || '';
-      case 'image': return imageUrl || '';
+      case 'image': return imageBase64 || '';
       default: return content || '';
     }
   };
@@ -99,7 +99,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
     if (content) pdfContent += `CONTENT:\n${content}\n\n`;
     if (suggestions) pdfContent += `SUGGESTIONS:\n${suggestions}\n\n`;
     if (tips) pdfContent += `TIPS:\n${tips}\n\n`;
-    if (imageUrl) pdfContent += `IMAGE URL:\n${imageUrl}\n\n`;
+    if (imageBase64) pdfContent += `IMAGE URL:\n${imageBase64}\n\n`;
 
     const language = additionalData?.language || 'en';
     generatePDF(pdfContent, `${type}_${title.replace(/\s+/g, '_')}`, language);
@@ -130,11 +130,11 @@ export const OutputCard: React.FC<OutputCardProps> = ({
   };
 
   const handleDownloadImageOnly = () => {
-    if (!imageUrl) return;
+    if (!imageBase64) return;
 
     const link = document.createElement('a');
     link.download = `${type}_image_${Date.now()}.png`;
-    link.href = imageUrl;
+    link.href = imageBase64;
     link.target = '_blank';
     link.click();
     
@@ -164,10 +164,10 @@ export const OutputCard: React.FC<OutputCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden ${getCardStyle()} ${className}`}
+      className={`bg-white dark:bg-transparent rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden ${getCardStyle()} ${className}`}
     >
       {/* Header */}
-      <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+      <div className="p-4 sm:p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-transparent backdrop-blur-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-3 mb-2">
@@ -230,7 +230,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               <Camera className="w-4 h-4" />
             </motion.button>
 
-            {imageUrl && (
+            {imageBase64 && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -302,7 +302,7 @@ export const OutputCard: React.FC<OutputCardProps> = ({
             className="max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800"
           >
             {activeTab === 'content' && content && (
-              <div className="bg-slate-800 dark:bg-gray-900 text-green-400 dark:text-green-300 p-4 rounded-lg border-2 border-slate-600 dark:border-gray-600 font-mono text-sm leading-relaxed">
+              <div className="bg-slate-800 dark:bg-transparent  text-green-400 dark:text-green-300 p-4 rounded-lg border-2 border-slate-600 dark:border-gray-600 font-mono text-sm leading-relaxed">
                 <pre className="whitespace-pre-wrap">
                   {content}
                 </pre>
@@ -333,10 +333,10 @@ export const OutputCard: React.FC<OutputCardProps> = ({
               </div>
             )}
             
-            {activeTab === 'image' && imageUrl && (
+            {activeTab === 'image' && imageBase64 && (
               <div className="text-center">
                 <img
-                  src={imageUrl}
+                  src={imageBase64}
                   alt={title}
                   className="max-w-full h-auto rounded-lg shadow-lg mx-auto"
                   onError={(e) => {

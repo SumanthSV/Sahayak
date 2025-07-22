@@ -241,34 +241,34 @@ const VoiceAssessment: React.FC = () => {
   const currentSampleTexts = sampleTexts[selectedLanguage as keyof typeof sampleTexts] || sampleTexts.english;
 
   return (
-    <div className="h-screen bg-white dark:bg-black  overflow-hidden">
+    <div className="dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black  overflow-hidden">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/80 dark:bg-zinc-950 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-6 py-6"
+        className="bg-white/80 dark:bg-transparent backdrop-blur-lg  px-6 py-3"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mt-14 mx-auto">
           <div className="flex items-center space-x-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
               className="w-12 h-12  rounded-2xl flex items-center justify-center"
             >
-              <Mic className="w-6 h-6 text-black dark:text-white" />
+              <Mic className="w-5 h-5 text-black dark:text-white" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-200">
+              <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 AI Voice Assessment
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Assess students' reading skills with AI-powered voice analysis</p>
+              <p className="text-gray-600  dark:text-gray-400 text-sm">Assess students' reading skills with AI-powered voice analysis</p>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* Main Content - Side by Side Layout */}
-      <div className="h-[calc(100vh-140px)] max-w-7xl mx-auto p-6">
+      <div className=" max-w-7xl mx-auto p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
           {/* Left Panel - Input */}
           <motion.div
@@ -278,7 +278,7 @@ const VoiceAssessment: React.FC = () => {
             className="space-y-4 overflow-y-auto pr-2"
           >
             {/* Configuration */}
-            <div className="bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <div className="bg-white/90dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
@@ -296,7 +296,7 @@ const VoiceAssessment: React.FC = () => {
                     value={studentName}
                     onChange={(e) => setStudentName(e.target.value)}
                     placeholder="Enter student name..."
-                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  text-sm bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 
@@ -308,10 +308,10 @@ const VoiceAssessment: React.FC = () => {
                     <select
                       value={selectedGrade}
                       onChange={(e) => setSelectedGrade(e.target.value)}
-                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  text-sm  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                     >
                       {grades.map((grade) => (
-                        <option key={grade.value} value={grade.value}>
+                        <option className="dark:bg-zinc-900"  key={grade.value} value={grade.value}>
                           {grade.label}
                         </option>
                       ))}
@@ -325,10 +325,10 @@ const VoiceAssessment: React.FC = () => {
                     <select
                       value={selectedLanguage}
                       onChange={(e) => setSelectedLanguage(e.target.value)}
-                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100"
+                      className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  text-sm  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                     >
                       {languages.map((lang) => (
-                        <option key={lang.value} value={lang.value}>
+                        <option className="dark:bg-zinc-900"   key={lang.value} value={lang.value}>
                           {lang.label}
                         </option>
                       ))}
@@ -355,7 +355,7 @@ const VoiceAssessment: React.FC = () => {
                     value={assessmentText}
                     onChange={(e) => setAssessmentText(e.target.value)}
                     placeholder="Enter the text for students to read..."
-                    className="w-full h-20 p-3 border border-gray-200 dark:border-gray-600 rounded-xl  resize-none bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-100 text-sm"
+                    className="w-full h-20 p-3 border border-gray-200 dark:border-gray-600 rounded-xl  text-sm  resize-none bg-white dark:bg-transparent text-gray-900 dark:text-gray-100 text-sm"
                   />
                 </div>
 
@@ -380,7 +380,7 @@ const VoiceAssessment: React.FC = () => {
             </div>
 
             {/* Recording Controls */}
-            <div className="bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <div className="bg-white/90dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
                   <Mic className="w-4 h-4 text-white" />
@@ -475,7 +475,7 @@ const VoiceAssessment: React.FC = () => {
             className="flex flex-col h-full"
           >
             {assessmentResult ? (
-              <div className="h-full bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+              <div className="h-full bg-white/90dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                 <div className="p-4 border-b border-gray-200/50 dark:border-gray-700/50">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 flex items-center">
@@ -594,7 +594,7 @@ const VoiceAssessment: React.FC = () => {
                     </details>
                   )}
 
-                  <div className="bg-gray-50 dark:bg-zinc-900/50 p-3 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
+                  <div className="bg-gray-50 dark:bg-transparent/50 p-3 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
                     <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2 text-sm">Next Steps:</h4>
                     <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
                       <li>• Practice reading aloud for 10 minutes daily</li>
@@ -607,7 +607,7 @@ const VoiceAssessment: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full bg-white/90 dark:bg-zinc-950 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center">
+              <div className="h-full bg-white/90dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
                     animate={{ 

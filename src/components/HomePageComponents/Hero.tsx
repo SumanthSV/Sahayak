@@ -10,7 +10,7 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b  from-purple-50 via-white to-pink-50 dark:from-gray-950  dark:via-purple-900/10 dark:to-black">
+    <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8  dark:bg-gradient-to-b  dark:from-gray-950  dark:via-purple-900/10 dark:to-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center">
           {/* Headline */}
@@ -41,7 +41,7 @@ export default function Hero() {
               isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
             }`}
           >
-            <button className="border border-zinc-500 text-white  px-6 py-3 rounded-xl text-lg font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
+            <button className="border border-zinc-500 text-zinc-900 dark:text-white  px-6 py-3 rounded-xl text-lg font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 transform">
               Try It Free
             </button>
             <button className="text-purple-600 dark:text-purple-400 font-semibold text-lg hover:underline transition-all duration-200">

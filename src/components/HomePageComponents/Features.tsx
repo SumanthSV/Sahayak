@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 const features = [
   {
@@ -36,11 +36,17 @@ const features = [
 ]
 
 export default function UseCases() {
+
+
+
+
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-black text-white text-center">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white dark:bg-black text-black dark:text-white text-center">
+     
+
       {/* Label */}
       <div className="mb-4">
-        <span className="inline-block border border-white/20 rounded-full px-4 py-1 text-xs tracking-wider text-white/80">
+        <span className="inline-block border border-black/20 dark:border-white/20 rounded-full px-4 py-1 text-xs tracking-wider text-black/80 dark:text-white/80">
           USE CASES
         </span>
       </div>
@@ -51,7 +57,7 @@ export default function UseCases() {
       </h2>
 
       {/* Subtext */}
-      <p className="text-lg text-white/70 max-w-3xl mx-auto mb-16">
+      <p className="text-lg text-black/70 dark:text-white/70 max-w-3xl mx-auto mb-16">
         Discover how our AI teaching assistant transforms lesson planning, grading, and classroom management
         with personalized, data-driven insights. Make every lesson count with AI-powered efficiency.
       </p>
@@ -65,7 +71,7 @@ export default function UseCases() {
           >
             <div className="w-12 h-12">{feature.icon}</div>
             <h3 className="text-lg font-semibold">{feature.title}</h3>
-            <p className="text-white/60 text-sm leading-relaxed">
+            <p className="text-black/60 dark:text-white/60 text-sm leading-relaxed">
               {feature.description}
             </p>
           </div>

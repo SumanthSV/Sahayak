@@ -53,7 +53,7 @@ export default function HowItWorks() {
               <div key={index} className="relative">
                 {/* Step number */}
                 <div className="flex justify-center mb-6">
-                  <div className="w-12 h-12  rounded-full flex items-center justify-center text-white text-md font-bold border border-zinc-600">
+                  <div className="w-12 h-12  rounded-full flex items-center justify-center text-zinc-900 dark:text-white text-md font-bold border border-zinc-600">
                     {index + 1}
                   </div>
                 </div>

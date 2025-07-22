@@ -1,3 +1,5 @@
+import {motion} from 'framer-motion'
+
 export default function Demo() {
   return (
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-black">
@@ -13,7 +15,13 @@ export default function Demo() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="relative transform rotate-1 hover:rotate-0 transition-transform duration-500">
+          <motion.div className="relative "  
+          animate={{ rotate: [2, 0 ,2] }}
+          transition={{
+            duration: 3,
+            ease: "easeInOut",
+            repeat: Infinity,
+          }}>
             <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 shadow-2xl">
               {/* Device frame */}
               <div className="bg-black rounded-xl p-2">
@@ -38,7 +46,7 @@ export default function Demo() {
 
             {/* Drop shadow */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-2xl transform translate-x-4 translate-y-4 -z-10"></div>
-          </div>
+          </motion.div>
 
           <div className="text-center mt-8">
             <p className="text-lg text-gray-600 dark:text-gray-300 italic">
@@ -50,3 +58,4 @@ export default function Demo() {
     </section>
   )
 }
+

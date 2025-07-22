@@ -145,12 +145,12 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
 
   if (showResult) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="min-h-screen dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black p-6">
+        <div className="max-w-4xl mx-auto mt-14">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-8 text-center"
+            className="bg-white/80 dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-8 text-center"
           >
             <motion.div
               initial={{ scale: 0 }}
@@ -161,7 +161,7 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
               <Trophy className="w-10 h-10 text-white" />
             </motion.div>
 
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Game Complete!</h2>
+            <h2 className="text-3xl font-bold text-zinc-900 dark:text-white mb-2">Game Complete!</h2>
             <p className="text-xl text-gray-600 mb-6">{getScoreMessage()}</p>
 
             <div className="grid grid-cols-3 gap-4 mb-8">
@@ -184,7 +184,7 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handlePlayAgain}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center space-x-2"
+                className=" dark:text-white text-zinc-900 border border-zinc-600 font-semibold py-3 px-6 rounded-xl  transition-all duration-200 flex items-center space-x-2"
               >
                 <RotateCcw className="w-5 h-5" />
                 <span>Play Again</span>
@@ -193,10 +193,10 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onBackToGames}
-                className="bg-gradient-to-r from-gray-500 to-slate-500 text-white font-semibold py-3 px-6 rounded-xl hover:from-gray-600 hover:to-slate-600 transition-all duration-200 flex items-center space-x-2"
+                className="text-white dark:text-zinc-800 dark:bg-zinc-100 border border-zinc-600 font-semibold py-3 px-6 rounded-xl  transition-all duration-200 flex items-center space-x-2"
               >
-                <Gamepad2 className="w-5 h-5" />
-                <span>New Game</span>
+                <Gamepad2 className="w-5 h-5 dark:text-zinc-900 text-zinc-900" />
+                <span className="text-zinc-900 dark:text-zinc-800">New Game</span>
               </motion.button>
             </div>
           </motion.div>
@@ -208,12 +208,12 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
   const currentQ = gameData.questions[currentQuestion]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black p-6">
+      <div className="max-w-4xl mx-auto mt-14">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-8"
+          className=" dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-8"
         >
           {/* Game Header */}
           <div className="flex items-center justify-between mb-8">
@@ -227,9 +227,9 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
                 <span className="text-green-600 font-bold">Score: {getScore()}</span>
               </div>
             </div>
-            <div className="bg-red-100 rounded-xl p-3">
+            <div className="bg-red-100 rounded-xl p-2.5">
               <div className="flex items-center space-x-2">
-                <Clock className="w-5 h-5 text-red-600" />
+                <Clock className="w-4 h-4 text-red-600" />
                 <span className="text-red-600 font-bold">{timeLeft}s</span>
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
 
           {/* Question */}
           <div className="text-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">{currentQ.question}</h3>
+            <h3 className="text-2xl font-bold text-zinc-900 dark:text-white mb-6">{currentQ.question}</h3>
 
             {/* Answer Options */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
@@ -256,12 +256,12 @@ export default function GamePlay({ gameData, onGameComplete, onBackToGames }: Ga
                   whileTap={{ scale: selectedAnswer === null ? 0.98 : 1 }}
                   onClick={() => handleAnswer(index)}
                   disabled={selectedAnswer !== null}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-xl border transition-all duration-200 ${
                     selectedAnswer === index
                       ? selectedAnswer === currentQ.correctAnswer
                         ? "border-green-500 bg-green-50 text-green-700"
                         : "border-red-500 bg-red-50 text-red-700"
-                      : "border-gray-200 hover:border-indigo-300 hover:bg-indigo-50"
+                      : "border-gray-200 hover:border-zinc-300 dark:hover:bg-slate-700 hover:bg-slate-300"
                   } disabled:cursor-not-allowed`}
                 >
                   <div className="flex items-center space-x-3">

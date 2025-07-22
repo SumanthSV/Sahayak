@@ -27,6 +27,16 @@ export default {
         '2xl': 'var(--spacing-2xl)',
         '3xl': 'var(--spacing-3xl)',
       },
+       animation: {
+        spinSlow: 'spin 10s linear infinite',
+        wiggle: 'wiggle 3s ease-in-out infinite',
+      },
+      keyframes: {
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(2deg)' },
+          '50%': { transform: 'rotate(-2deg)' },
+        },
+      },
       colors: {
         // Custom color system for dark mode
         'bg-primary': 'var(--bg-primary)',

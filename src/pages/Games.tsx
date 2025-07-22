@@ -101,8 +101,8 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black p-6">
+      <div className="max-w-6xl mt-14 mx-auto">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -113,15 +113,15 @@ export default function Home() {
           <div className="flex items-center space-x-3 mb-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center"
+              className="w-12 h-12  rounded-xl flex items-center justify-center"
             >
-              <Gamepad2 className="w-6 h-6 text-white" />
+              <Gamepad2 className="w-5 h-5 text-white" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-zinc-800 dark:text-zinc-200">
                 Educational Games
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">Learn through fun, AI-generated games and challenges</p>
+              <p className="text-gray-600 text-sm dark:text-gray-400">Learn through fun, AI-generated games and challenges</p>
             </div>
           </div>
         </motion.div>
@@ -131,9 +131,9 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
+          className="bg-white/80 dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 p-6 mb-8"
         >
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+          <h2 className="text-xl font-semibold text-gray-600  dark:text-zinc-200 mb-6 flex items-center">
             <Target className="w-5 h-5 text-indigo-600 mr-2" />
             Game Settings
           </h2>
@@ -145,10 +145,10 @@ export default function Home() {
               <select
                 value={gameConfig.grade}
                 onChange={(e) => setGameConfig((prev) => ({ ...prev, grade: e.target.value }))}
-                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100 transition-all duration-200"
               >
                 {grades.map((grade) => (
-                  <option key={grade.value} value={grade.value}>
+                 <option   className="dark:bg-zinc-900"key={grade.value} value={grade.value}>
                     {grade.label}
                   </option>
                 ))}
@@ -159,11 +159,11 @@ export default function Home() {
               <select
                 value={gameConfig.difficulty}
                 onChange={(e) => setGameConfig((prev) => ({ ...prev, difficulty: e.target.value as any }))}
-                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200"
+                className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl t bg-white dark:bg-transparent text-gray-900 dark:text-gray-100 transition-all duration-200"
               >
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
+                <option  className="dark:bg-zinc-900 "value="easy">Easy</option>
+                <option  className="dark:bg-zinc-900 "value="medium">Medium</option>
+                <option  className="dark:bg-zinc-900 "value="hard">Hard</option>
               </select>
             </div>
           </div>

@@ -22,6 +22,7 @@ const LessonPlanner = React.lazy(() => import('./pages/LessonPlanner'));
 const StudentTracker = React.lazy(() => import('./pages/StudentTracker'));
 const Games = React.lazy(() => import('./pages/Games'));
 const Settings = React.lazy(() => import('./pages/Settings'));
+const Home = React.lazy(() => import('./pages/Home'));
 
 function App() {
   const { user } = useAuth();
@@ -61,8 +62,13 @@ function App() {
         
         <AnimatePresence mode="wait">
           <Suspense fallback={<LoadingSpinner />}>
+
+          
             {!user ? (
               <Routes>
+                <Route path="/" element={
+                    <Home />
+                } />
                 <Route path="/signup" element={
                   <div
                     className="container-responsive"
@@ -70,7 +76,7 @@ function App() {
                     <SignupForm onBackToLogin={() => setShowSignup(false)} />
                   </div>
                 } />
-                <Route path="/*" element={
+                <Route path="/login" element={
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -89,7 +95,7 @@ function App() {
             ) : (
               <Routes>
                 <Route path="/" element={<Layout />}>
-                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route index element={<Dashboard />} />
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="stories" element={<StoryGenerator />} />
                   <Route path="worksheets" element={<WorksheetGenerator />} />

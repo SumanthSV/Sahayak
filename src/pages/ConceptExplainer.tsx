@@ -146,7 +146,7 @@ const ConceptExplainer: React.FC = () => {
   const currentSampleQuestion = sampleQuestions[language as keyof typeof sampleQuestions] || sampleQuestions.en;
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 overflow-hidden">
+    <div className=" dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black overflow-hidden">
       <LoadingTeacher 
         isVisible={isExplaining}
         message="Analyzing and explaining the concept... Please wait ⏳"
@@ -157,29 +157,29 @@ const ConceptExplainer: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-700/50 px-6 py-6"
+        className="bg-white/80 dark:bg-transparent backdrop-blur-lg  px-6 py-2"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mt-14 mx-auto">
           <div className="flex items-center space-x-4">
             <motion.div
               whileHover={{ scale: 1.05, rotate: 5 }}
-              className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center"
+              className=" rounded-2xl flex items-center justify-center"
             >
-              <HelpCircle className="w-6 h-6 text-white" />
+              <HelpCircle className="w-5 h-5 text-white" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 Adaptive Concept Explainer
               </h1>
-              <p className="text-gray-600 dark:text-gray-400">Get personalized, age-appropriate explanations with learning style adaptation</p>
+              <p className="text-gray-600 text-sm dark:text-gray-400">Get personalized, age-appropriate explanations with learning style adaptation</p>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* Main Content - Fixed Layout */}
-      <div className="h-[calc(100vh-140px)] max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 h-full">
+      <div className=" max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 ">
           {/* Left Panel - Input Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -188,7 +188,7 @@ const ConceptExplainer: React.FC = () => {
             className="space-y-4 overflow-y-auto pr-2"
           >
             {/* Configuration Card */}
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <div className="bg-white/90 dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
                   <Target className="w-4 h-4 text-white" />
@@ -198,14 +198,14 @@ const ConceptExplainer: React.FC = () => {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty Level</label>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">Difficulty Level</label>
                   <select
                     value={difficulty}
                     onChange={(e) => setDifficulty(e.target.value)}
-                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 text-sm rounded-xl  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                   >
                     {difficulties.map((level) => (
-                      <option key={level.value} value={level.value}>
+                      <option className="bg-zinc-900"key={level.value} value={level.value}>
                         {level.label}
                       </option>
                     ))}
@@ -213,14 +213,14 @@ const ConceptExplainer: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Subject (Optional)</label>
+                  <label className="block  text-xs  font-medium text-gray-700 dark:text-gray-300 mb-2">Subject (Optional)</label>
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-sm  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                   >
                     {subjects.map((sub) => (
-                      <option key={sub.value} value={sub.value}>
+                      <option className="bg-zinc-900"key={sub.value} value={sub.value}>
                         {sub.label}
                       </option>
                     ))}
@@ -229,23 +229,23 @@ const ConceptExplainer: React.FC = () => {
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Output Language</label>
+                <label className="block  text-xs  font-medium text-gray-700 dark:text-gray-300 mb-2">Output Language</label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-sm  bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                 >
-                  <option value="en">English</option>
-                  <option value="hi">हिंदी</option>
-                  <option value="kn">ಕನ್ನಡ</option>
-                  <option value="mr">मराठी</option>
-                  <option value="ta">தமிழ்</option>
-                  <option value="bn">বাংলা</option>
+                  <option className="bg-zinc-900"value="en">English</option>
+                  <option className="bg-zinc-900"value="hi">हिंदी</option>
+                  <option className="bg-zinc-900"value="kn">ಕನ್ನಡ</option>
+                  <option className="bg-zinc-900"value="mr">मराठी</option>
+                  <option className="bg-zinc-900"value="ta">தமிழ்</option>
+                  <option className="bg-zinc-900"value="bn">বাংলা</option>
                 </select>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Learning Style</label>
+                <label className="block  text-xs  font-medium text-gray-700 dark:text-gray-300 mb-2">Learning Style</label>
                 <div className="grid grid-cols-2 gap-3">
                   {learningStyles.map((style) => (
                     <motion.button
@@ -256,7 +256,7 @@ const ConceptExplainer: React.FC = () => {
                       className={`p-3 rounded-xl border-2 transition-all duration-200 text-left ${
                         learningStyle === style.value
                           ? 'border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 bg-white dark:bg-transparent text-gray-700 dark:text-gray-300'
                       }`}
                     >
                       <div className="flex items-center space-x-2 mb-1">
@@ -271,7 +271,7 @@ const ConceptExplainer: React.FC = () => {
             </div>
             
             {/* Question Input Card */}
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
+            <div className="bg-white/90 dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-6">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
                   <MessageCircle className="w-4 h-4 text-white" />
@@ -285,7 +285,7 @@ const ConceptExplainer: React.FC = () => {
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
                     placeholder="Ask any question about science, math, or any topic you want to explain to your students..."
-                    className="w-full h-24 p-4 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="w-full h-24 p-4 border border-gray-200 dark:border-gray-600 rounded-xl  resize-none bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
                   />
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -378,7 +378,7 @@ const ConceptExplainer: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="h-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center">
+              <div className="h-full bg-white/90 dark:bg-transparent backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
                     animate={{ 

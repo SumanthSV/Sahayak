@@ -96,7 +96,7 @@ export class AIService {
   private static generateEducationalImageFunction = httpsCallable(functions, 'generateEducationalImage');
   private static translateContentFunction = httpsCallable(functions, 'translateContent');
   private static evaluateVoiceReadingFunction = httpsCallable(functions, 'evaluateVoiceReading');
-  private static generateLessonSuggestionsFunction = httpsCallable(functions, 'generateLessonSuggestions');
+  private static generateLessonImprovementsFunction = httpsCallable(functions, 'generateLessonImprovements');
   private static generateEducationalGameFunction = httpsCallable(functions, 'generateEducationalGame');
 
   // Story Generation
@@ -327,7 +327,7 @@ export class AIService {
   }
 
   // Lesson Plan Suggestions
-  static async generateLessonSuggestions(lessonPlan: {
+  static async generateLessonImprovements(lessonPlan: {
     title: string;
     subject: string;
     grade: string;
@@ -341,7 +341,7 @@ export class AIService {
     nextLessonTopics: string[];
   }> {
     try {
-      const result = await this.generateLessonSuggestionsFunction(lessonPlan);
+      const result = await this.generateLessonImprovementsFunction(lessonPlan);
       return (result.data as any);
     } catch (error) {
       console.error('Error generating lesson suggestions:', error);

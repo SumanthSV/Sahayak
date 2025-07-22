@@ -2,14 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ModernSidebar from './ResponsiveSidebar';
-import ModernHeader from './Header';
+import Header from './Header';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 import { OfflineIndicator } from '../UI/OfflineIndicator';
+import { useAuth } from '../../hooks/useAuth';
 
 const ModernLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const isOnline = useOnlineStatus();
+  const { user } = useAuth();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -29,10 +31,6 @@ const ModernLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
-      {/* Skip Link for Screen Readers */}
-      {/* <a href="#main-content" className="skip-link">
-        Skip to main content
-      </a> */}
 
       {/* Offline Indicator */}
       <OfflineIndicator isOnline={isOnline} />
@@ -53,7 +51,7 @@ const ModernLayout: React.FC = () => {
         {/* Main Content Area */}
         <div className="flex flex-col min-h-screen">
           {/* Header */}
-          <ModernHeader 
+          <Header 
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             isSidebarOpen={isSidebarOpen}
             isMobile={isMobile}

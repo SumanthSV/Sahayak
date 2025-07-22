@@ -26,12 +26,12 @@ interface GameReadyProps {
 
 export default function GameReady({ gameData, gameConfig, onStartGame, onBackToGames }: GameReadyProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-6">
+    <div className="min-h-screen dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black p-6 flex  justify-center items-center">
       <div className="max-w-4xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8"
+          className="bg-white/80 dark:bg-transparent  backdrop-blur-lg rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 p-8"
         >
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">{gameData.title}</h2>
@@ -61,16 +61,16 @@ export default function GameReady({ gameData, gameConfig, onStartGame, onBackToG
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onStartGame}
-              className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold py-4 px-8 rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 flex items-center space-x-2"
+              className="text-white font-semibold py-4 px-8 rounded-xl border border-zinc-800 dark:border-zinc-600 transition-all duration-200 flex items-center space-x-2"
             >
-              <Play className="w-6 h-6" />
-              <span>Start Game</span>
+              <Play className="w-6 h-6 text-zinc-900 dark:text-white" />
+              <span className="text-zinc-900 dark:text-white">Start Game</span>
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onBackToGames}
-              className="bg-gradient-to-r from-gray-500 to-slate-500 text-white font-semibold py-4 px-8 rounded-xl hover:from-gray-600 hover:to-slate-600 transition-all duration-200 flex items-center space-x-2"
+              className="bg-black dark:bg-zinc-100 text-white dark:text-zinc-800 font-semibold py-4 px-8 rounded-xl hover:from-gray-600 hover:to-slate-600 transition-all duration-200 flex items-center space-x-2"
             >
               <RotateCcw className="w-5 h-5" />
               <span>Back to Games</span>

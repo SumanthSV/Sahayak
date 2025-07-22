@@ -1,3 +1,6 @@
+import Logo2 from '../../assets/Logo2.png'
+
+
 export default function CTABanner() {
   return (
     <section className="relative h-screen flex flex-col justify-center items-center py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#3b0764] via-[#7e22ce] to-[#581c87] dark:from-[#1e1b4b] dark:via-10% dark:via-[#4c1d95] dark:to-black overflow-hidden">
@@ -23,6 +26,8 @@ export default function CTABanner() {
 
       {/* Main Text */}
       <div className="relative max-w-4xl mx-auto text-center">
+        <img src={Logo2} alt="" className='mx-auto w-14' />
+        <h2>Sahayak AI</h2>
         <h2 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-purple-400 drop-shadow-md mb-6">
           Ready to Transform Your Teaching?
         </h2>
@@ -44,4 +49,4 @@ export default function CTABanner() {
       <div className="absolute inset-0 bg-gradient-radial from-transparent via-white/10 to-transparent pointer-events-none"></div>
     </section>
   );
-}
+} 
