@@ -23,6 +23,7 @@ const StudentTracker = React.lazy(() => import('./pages/StudentTracker'));
 const Games = React.lazy(() => import('./pages/Games'));
 const Settings = React.lazy(() => import('./pages/Settings'));
 const Home = React.lazy(() => import('./pages/Home'));
+import Navbar from './components/HomePageComponents/Navbar'
 
 function App() {
   const { user } = useAuth();
@@ -57,7 +58,7 @@ function App() {
 
   return (
     <LanguageProvider>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen ">
         <OfflineIndicator isOnline={isOnline} />
         
         <AnimatePresence mode="wait">
@@ -76,20 +77,18 @@ function App() {
                     <SignupForm onBackToLogin={() => setShowSignup(false)} />
                   </div>
                 } />
-                <Route path="/login" element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className="container-responsive"
-                  >
+                <Route path="/login" element=
                     {showSignup ? (
+                      <>
+                      <Navbar/>
                       <SignupForm onBackToLogin={() => setShowSignup(false)} />
+                        </>
                     ) : (
+                      <>
+                      <Navbar/>
                       <LoginForm onShowSignup={() => setShowSignup(true)} />
-                    )}
-                  </motion.div>
+                        </>
+                    )
                 } />
               </Routes>
             ) : (

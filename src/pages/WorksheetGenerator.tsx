@@ -12,7 +12,9 @@ import {
   Settings,
   CheckSquare,
   Edit,
-  List
+  List,
+  MicOff,
+  Mic
 } from 'lucide-react';
 import { AIService } from '../services/aiService';
 import { FirebaseService } from '../services/firebaseService';
@@ -21,6 +23,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { LoadingTeacher } from '../components/UI/LoadingTeacher';
 // import { OutputCard } from '../components/UI/OutputCard';
 import { InputCard, InputField } from '../components/UI/InputCard';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
 import { GenerateButton } from '../components/UI/GenerateButton';
 import toast from 'react-hot-toast';
 import {OutputCard} from '../components/UI/OutputCard'
@@ -35,12 +38,14 @@ const WorksheetGenerator: React.FC = () => {
   const [worksheetContent, setWorksheetContent] = useState<{ [grade: string]: string }>({});
   const [selectedGrades, setSelectedGrades] = useState<string[]>(['3']);
   const [subject, setSubject] = useState('math');
-  const [topic, setTopic] = useState('');
+  // const [prompt, setPrompt] = useState('');
   const [language, setLanguage] = useState(currentLanguage);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [questionTypes, setQuestionTypes] = useState<string[]>(['mcq', 'fillblanks']);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedWorksheet, setSelectedWorksheet] = useState<string>('');
+  const [prompt, setPrompt] = useState('');
+  const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
 
   const subjects = [
     { value: 'math', label: t('mathematics') },
@@ -82,6 +87,11 @@ const WorksheetGenerator: React.FC = () => {
     { value: 'matching', label: 'Matching Questions' },
     { value: 'essay', label: 'Essay Questions' }
   ];
+  React.useEffect(() => {
+    if (transcript) {
+      setPrompt(transcript);
+    }
+  }, [transcript]);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -91,6 +101,14 @@ const WorksheetGenerator: React.FC = () => {
         setUploadedImage(e.target?.result as string);
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(language);
     }
   };
 
@@ -111,8 +129,8 @@ const WorksheetGenerator: React.FC = () => {
   };
 
   const handleGenerateWorksheet = async () => {
-    if (!topic.trim()) {
-      toast.error('Please enter a topic');
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
       return;
     }
     
@@ -125,7 +143,7 @@ const WorksheetGenerator: React.FC = () => {
     try {
       const result = await AIService.generateDifferentiatedWorksheet({
         imageData: uploadedImage || undefined,
-        topic,
+        prompt,
         subject,
         grades: selectedGrades,
         language,
@@ -151,13 +169,13 @@ const WorksheetGenerator: React.FC = () => {
     try {
       await FirebaseService.saveGeneratedContent({
         type: 'worksheet',
-        title: `${subject} Worksheet - ${topic} - Grade ${selectedWorksheet}`,
+        title: `${subject} Worksheet - ${prompt} - Grade ${selectedWorksheet}`,
         content: worksheetContent[selectedWorksheet],
         subject,
         grade: selectedWorksheet,
         language,
         teacherId: user.uid,
-        metadata: { topic, difficulty, questionTypes },
+        metadata: { prompt, difficulty, questionTypes },
         createdAt: new Date()
       });
       toast.success('Worksheet saved successfully!');
@@ -256,15 +274,25 @@ const WorksheetGenerator: React.FC = () => {
                 </div>
               </div>
               
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Topic/Concept</label>
-                <input
-                  type="text"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="Enter the topic for the worksheet..."
-                  className="w-full p-3 border border-gray-200 dark:border-gray-600 rounded-xl text-sm   bg-white dark:bg-transparent text-gray-900 dark:text-gray-100"
+              <div className="relative">
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder={('Enter a prompt for the worksheet...')}
+                  className="w-full h- p-4 border border-gray-200 dark:border-gray-600 rounded-xl text-sm resize-none bg-white/50 dark:bg-transparent  text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                 />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleVoiceInput}
+                  className={`absolute top-3 right-3 p-2 rounded-lg transition-all duration-200 ${
+                    isListening
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 animate-pulse'
+                      : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
+                  }`}
+                >
+                  {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                </motion.button>
               </div>
               
               <div className="grid grid-cols-2 gap-4 mb-4">
@@ -352,7 +380,7 @@ const WorksheetGenerator: React.FC = () => {
                 <GenerateButton
                   onClick={handleGenerateWorksheet}
                   isLoading={isGenerating}
-                  disabled={!topic.trim() || selectedGrades.length === 0}
+                  disabled={!prompt.trim() || selectedGrades.length === 0}
                   size="md"
                 >
                   Generate Worksheets
@@ -415,7 +443,7 @@ const WorksheetGenerator: React.FC = () => {
                           </div>
                         </div> */}
                         <OutputCard  
-                        title={`Story: ${topic}...`}
+                        title={`Story: ${prompt}...`}
                         content={worksheetContent[selectedWorksheet]}
                         type="story"
                         onSave={handleSave}

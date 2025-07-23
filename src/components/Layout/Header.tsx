@@ -90,7 +90,7 @@ const Header: React.FC<ModernHeaderProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="fixed w-[80%] top-0 backdrop-blur-xl bg-white/90 dark:bg-transparent border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-2  z-50 shadow-lg"
+        className="sticky w-full top-0 backdrop-blur-xl bg-white/90 dark:bg-transparent border-b border-gray-200/50 dark:border-gray-700/50 px-4 sm:px-6 py-2  z-50 shadow-lg"
       >
         <div className="flex items-center justify-between">
           {/* Left Section */}

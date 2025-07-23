@@ -69,7 +69,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
       }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`
-        ${isMobile ? 'fixed' : 'relative'} 
+        ${isMobile ? 'fixed' : 'sticky top-0 left-0'} 
         ${sidebarWidth} h-screen
         backdrop-blur-xl bg-white/90 dark:bg-zinc-950
         border-r border-gray-200/50 dark:border-gray-700/50 
@@ -83,8 +83,8 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
             whileHover={{ scale: 1.02 }}
             className="flex items-center space-x-3"
           >
-            <div className={` ${isCollapsed ?"dipla" :"w-8 h-8"}  bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg`}>
-              <img src={Logo2} className='' alt="" />
+            <div className={`   bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg`}>
+              <img src={Logo2} className={`w-6 h-6 object-contain  ${isCollapsed ?"w-0 h-0" :"w-8 h-8"} `} alt="" />
             </div>
             {/* <AnimatePresence> */}
               {!isCollapsed && (
@@ -110,7 +110,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
               className=" rounded-xl bg-gray-100 p-1 dark:bg-transparent hover:bg-gray-200 dark:hover:bg-zinc-900 transition-all duration-200"
             >
               {isCollapsed ? (
-                <Menu className="w-5 h-5 text-gray-400 dark:text-gray-200" />
+                <Menu className="w-5 h-5 -ml-7 text-gray-400 dark:text-gray-200" />
               ) : (
                 <Text className="w-5 h-5 text-gray-400 dark:text-gray-200" />
               )}

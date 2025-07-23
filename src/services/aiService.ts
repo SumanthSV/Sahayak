@@ -13,7 +13,7 @@ export interface StoryRequest {
 
 export interface WorksheetRequest {
   imageData?: string;
-  topic: string;
+  prompt: string;
   subject: string;
   grades: string[];
   language: string;

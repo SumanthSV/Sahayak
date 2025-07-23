@@ -8,7 +8,9 @@ import {
   GraduationCap,
   Globe,
   Palette,
-  Save
+  Save,
+  Mic,
+  MicOff
 } from 'lucide-react';
 import { AIService } from '../services/aiService';
 import { FirebaseService } from '../services/firebaseService';
@@ -18,6 +20,8 @@ import { LoadingTeacher } from '../components/UI/LoadingTeacher';
 import { OutputCard } from '../components/UI/OutputCard';
 import { InputCard, InputField } from '../components/UI/InputCard';
 import { GenerateButton } from '../components/UI/GenerateButton';
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
+
 import toast from 'react-hot-toast';
 
 const VisualAids: React.FC = () => {
@@ -33,6 +37,8 @@ const VisualAids: React.FC = () => {
   const [generatedAid, setGeneratedAid] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+    const { isListening, transcript, startListening, stopListening } = useSpeechRecognition();
+  
 
   const subjects = [
     { value: 'science', label: t('science') },
@@ -60,6 +66,12 @@ const VisualAids: React.FC = () => {
     kn: 'ನೀರಿನ ಚಕ್ರ'
   };
 
+  React.useEffect(() => {
+    if (transcript) {
+      setTopic(transcript);
+    }
+  }, [transcript]);
+
   const handleGenerate = async () => {
     if (!topic.trim()) {
       toast.error('Please enter a topic');
@@ -84,6 +96,14 @@ const VisualAids: React.FC = () => {
       toast.error('Failed to generate visual aid. Please try again.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleVoiceInput = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(language);
     }
   };
 
@@ -236,6 +256,18 @@ const VisualAids: React.FC = () => {
                   placeholder="Enter the topic you want to create a visual aid for..."
                   className="w-full p-4 border  text-sm border-gray-200 dark:border-gray-600 rounded-xl bg-white/50 dark:bg-transparent text-gray-900 dark:text-gray-100 backdrop-blur-sm"
                 />
+                <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleVoiceInput}
+                    className={`absolute right-8 p-2 rounded-lg transition-all duration-200 ${
+                      isListening
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 animate-pulse'
+                        : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
+                    }`}
+                  >
+                    {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+                  </motion.button>
               </InputField>
               
               <InputField label="Popular Topic">

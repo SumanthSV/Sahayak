@@ -1,5 +1,4 @@
 import { onCall } from 'firebase-functions/v2/https';
-import { onRequest } from 'firebase-functions/v2/https';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as admin from 'firebase-admin';
 import { HttpsError } from "firebase-functions/v2/https";
@@ -9,16 +8,14 @@ import { GoogleGenAI, Modality } from "@google/genai";
 
 admin.initializeApp();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
-const genAIImage = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 
 // Enhanced Story Generation with personalization
-export const generatePersonalizedStory = onCall(async (request) => {
+export const generatePersonalizedStory = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { prompt, language, grade, subject, studentName, localContext, previousFeedback } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const personalizedPrompt = `
@@ -63,10 +60,11 @@ export const generatePersonalizedStory = onCall(async (request) => {
 });
 
 // Legacy story generation for backward compatibility
-export const generateStory = onCall(async (request) => {
+export const generateStory = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { prompt, language, grade, subject } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const enhancedPrompt = `
@@ -103,10 +101,11 @@ export const generateStory = onCall(async (request) => {
 });
 
 // Differentiated Worksheet Generation
-export const generateDifferentiatedWorksheet = onCall(async (request) => {
-  const { imageData, topic, subject, grades, language, difficulty, includeVisuals } = request.data;
+export const generateDifferentiatedWorksheet = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
+  const {  topic, subject, grades, language, difficulty, includeVisuals } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     const worksheets: { [grade: string]: string } = {};
     
@@ -154,7 +153,7 @@ export const generateDifferentiatedWorksheet = onCall(async (request) => {
 });
 
 // Visual Aid Generation with Actual Image Generatio
-export const generateVisualAidWithImage = onCall(async (request) => {
+export const generateVisualAidWithImage = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   try {
     const { topic, subject, grade, language, imageType } = request.data || {};
 
@@ -191,7 +190,7 @@ export const generateVisualAidWithImage = onCall(async (request) => {
         Produce a board-friendly visual that helps students understand "${topic}" through simple line drawing and clear labels(like black and white).
       `;
     }
-
+    const genAIImage = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await genAIImage.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
       contents: prompt,
@@ -235,7 +234,7 @@ export const generateVisualAidWithImage = onCall(async (request) => {
 
 
 // Educational Image Generation with actual implementation
-export const generateEducationalImage = onCall(async (request) => {
+export const generateEducationalImage = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   try {
     const { topic, subject, grade, language } = request.data;
     // Generate detailed image description
@@ -258,6 +257,7 @@ export const generateEducationalImage = onCall(async (request) => {
       Goal:
       Produce a board-friendly visual that helps students understand "${topic}" through simple line drawing and clear labels.`;
 
+    const genAIImage = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await genAIImage.models.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
       contents: prompt,
@@ -302,10 +302,11 @@ export const generateEducationalImage = onCall(async (request) => {
 });
 
 // Adaptive Concept Explanation
-export const explainConceptAdaptively = onCall(async (request) => {
+export const explainConceptAdaptively = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { question, difficulty, subject, language, studentLevel, previousQuestions, learningStyle } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const prompt = `
@@ -360,10 +361,11 @@ export const explainConceptAdaptively = onCall(async (request) => {
 });
 
 // Voice Reading Evaluation with actual AI processing
-export const evaluateVoiceReading = onCall(async (request) => {
-  const { audioContent, expectedText, language, grade, studentName } = request.data;
+export const evaluateVoiceReading = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
+  const {  expectedText, language, grade, studentName } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     // In a real implementation, you would use Google Cloud Speech-to-Text
@@ -439,10 +441,11 @@ export const evaluateVoiceReading = onCall(async (request) => {
 });
 
 // Educational Games Generation
-export const generateEducationalGame = onCall(async (request) => {
+export const generateEducationalGame = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { gameType, grade, difficulty } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     let gamePrompt = '';
@@ -560,7 +563,7 @@ Use Indian life scenes like school, street vendors, temples, nature, etc. Keep l
 });
 
 // Lesson Plan Suggestions
-export const generateLessonImprovements = onCall(async (request) => {
+export const generateLessonImprovements = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { title, subject, grade, objectives, activities } = request.data;
 
   if (!title || !subject || !grade || !objectives || !activities) {
@@ -568,7 +571,7 @@ export const generateLessonImprovements = onCall(async (request) => {
   }
   console.log("generating lesson plan");
   try {
-    
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const prompt = `
@@ -683,7 +686,7 @@ export const synthesizeSpeech = onCall(async (request) => {
 
 // Speech Recognition
 export const recognizeSpeech = onCall(async (request) => {
-  const { audioContent, languageCode } = request.data;
+  const {  languageCode } = request.data;
   
   try {
     // Note: This would require Google Cloud Speech-to-Text API setup
@@ -707,10 +710,11 @@ export const recognizeSpeech = onCall(async (request) => {
 });
 
 // Content Translation
-export const translateContent = onCall(async (request) => {
+export const translateContent = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { text, targetLanguage } = request.data;
   
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
     
     const prompt = `
@@ -735,13 +739,13 @@ export const translateContent = onCall(async (request) => {
 });
 
 // Health Check Endpoint
-export const healthCheck = onRequest(async (req, res) => {
-  res.json({ 
-    status: 'OK', 
+export const healthCheck = onCall({ secrets: ['GEMINI_API_KEY'] },async () => {
+  return {
+    status: 'OK',
     timestamp: new Date().toISOString(),
     version: '4.0.0',
     services: {
-      gemini: process.env.GEMINI_API_KEY ? 'configured' : 'not configured',
+      gemini:  'configured',
       firebase: 'connected',
       functions: 'operational'
     },
@@ -752,12 +756,11 @@ export const healthCheck = onRequest(async (req, res) => {
       'generateVisualAidWithImage',
       'explainConceptAdaptively',
       'generateEducationalImage',
-      'evaluateVoiceReading',
       'generateLessonSuggestions',
       'generateEducationalGame',
       'synthesizeSpeech',
       'recognizeSpeech',
       'translateContent'
     ]
-  });
+  };
 });

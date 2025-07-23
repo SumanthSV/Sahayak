@@ -16,6 +16,8 @@ import {
 import toast from 'react-hot-toast';
 import { FirebaseService } from '../../services/firebaseService';
 import { AnimatedBackground } from './AnimatedBackground';
+import Logo2 from '../../assets/Logo2.png'
+
 import { ThreeDScene } from './ThreeDScene';
 
 interface FuturisticSignupFormProps {
@@ -77,14 +79,14 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
   };
 
   return (
-    <div className="h-screen w-screen fixed inset-0 overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-black dark:via-purple-950 dark:to-black ">
+    <div className="h-screen  dark:bg-gradient-to-br dark:from-gray-950 via-60%  dark:via-purple-950/10  dark:to-black">
       {/* Animated Background */}
-      <AnimatedBackground />
-      
+      {/* <AnimatedBackground />
+       */}
       {/* 3D Scene */}
-      <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />}>
+      {/* <Suspense fallback={<div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 to-blue-900/20" />}>
         <ThreeDScene sceneType="signup" />
-      </Suspense>
+      </Suspense> */}
 
       {/* Main Content */}
       <div className="relative z-10 h-full flex items-center justify-center p-4">
@@ -109,10 +111,11 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
               }}
               className="relative"
             >
-              <div className="w-32 h-32 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/50">
-                <Castle className="w-16 h-16 text-white" />
+              <div className="w-24 h-24  rounded-3xl flex items-center justify-center ">
+                <img src={Logo2} alt="" />
+                {/* <Castle className="w-16 h-16 text-white" /> */}
               </div>
-              <div className="absolute -inset-4 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-3xl opacity-20 blur-xl animate-pulse" />
+              {/* <div className="absolute -inset-4 bg-gradient-to-r from-cyan-400 to-purple-600 rounded-3xl opacity-20 blur-xl animate-pulse" /> */}
               
               {/* Floating magical elements */}
               <motion.div
@@ -147,17 +150,13 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
             </motion.div>
             
             <div className="space-y-4">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
                 Join Sahayak AI
               </h1>
-              <p className="text-xl text-gray-200 max-w-md">
+              <p className="text-sm  text-zinc-800 dark:text-white max-w-md">
                 Create your account and unlock the future of AI-powered education
               </p>
-              <div className="flex items-center justify-center space-x-2 text-cyan-400">
-                <Sparkles className="w-5 h-5 animate-pulse" />
-                <span className="text-sm">Powered by Advanced AI</span>
-                <Sparkles className="w-5 h-5 animate-pulse" />
-              </div>
+             
             </div>
           </motion.div>
 
@@ -166,14 +165,14 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="w-full max-w-md mx-auto"
+            className="w-full max-w-[26rem] mx-auto mt-14"
           >
-            <div className="backdrop-blur-xl bg-white/10 dark:bg-black/20 rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 relative overflow-hidden">
+            <div className="backdrop-blur-xl bg-white/10 dark:bg-transparent rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 p-8 relative overflow-hidden">
               {/* Glassmorphism overlay */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl" />
+              {/* <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-3xl" /> */}
               
               {/* Magical border effect */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 blur-sm" />
+              {/* <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 blur-sm" /> */}
               
               <div className="relative z-10">
                 <motion.button
@@ -206,19 +205,19 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.7, duration: 0.5 }}
                   >
-                    <label className="block text-sm font-medium text-gray-200 mb-2">Full Name *</label>
+                    <label className="block font-medium text-xs  text-zinc-600 dark:text-gray-200 mb-2">Full Name *</label>
                     <div className="relative group">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-cyan-400 transition-colors" />
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5  transition-colors" />
                       <input
                         type="text"
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
-                        className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 transition-all duration-300 ${
-                          errors.name ? 'border-red-500 focus:ring-red-400' : 'border-white/20 focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+                        className={`w-full pl-12 pr-4 py-2 bg-transparent text-sm backdrop-blur-sm border rounded-lg text-zinc-800 dark:text-white placeholder-gray-400 transition-all duration-300 ${
+                          errors.name ? 'border-red-500 ' : 'border-white/20 '
                         }`}
                         placeholder="Your full name"
                       />
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" />
+                      {/* <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" /> */}
                     </div>
                     {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
                   </motion.div>
@@ -229,19 +228,19 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8, duration: 0.5 }}
                   >
-                    <label className="block text-sm font-medium text-gray-200 mb-2">Email Address *</label>
+                    <label className="block  font-medium  mb-2 text-xs  text-zinc-600 dark:text-gray-200">Email Address *</label>
                     <div className="relative group">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-cyan-400 transition-colors" />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5  transition-colors" />
                       <input
                         type="email"
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
-                        className={`w-full pl-12 pr-4 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 transition-all duration-300 ${
-                          errors.email ? 'border-red-500 focus:ring-red-400' : 'border-white/20 focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+                        className={`w-full pl-12 pr-4 py-2  bg-transparent text-sm backdrop-blur-sm border rounded-lg  text-zinc-800 dark:text-white placeholder-gray-400 transition-all duration-300 ${
+                          errors.email ? 'border-red-500 ' : 'border-white/20 '
                         }`}
                         placeholder="you@example.com"
                       />
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" />
+                      {/* <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" /> */}
                     </div>
                     {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
                   </motion.div>
@@ -252,15 +251,15 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.9, duration: 0.5 }}
                   >
-                    <label className="block text-sm font-medium text-gray-200 mb-2">Password *</label>
+                    <label className="block font-medium  mb-2 text-xs  text-zinc-600 dark:text-gray-200">Password *</label>
                     <div className="relative group">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-cyan-400 transition-colors" />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5  transition-colors" />
                       <input
                         type={showPassword ? 'text' : 'password'}
                         value={formData.password}
                         onChange={(e) => handleInputChange('password', e.target.value)}
-                        className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 transition-all duration-300 ${
-                          errors.password ? 'border-red-500 focus:ring-red-400' : 'border-white/20 focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+                        className={`w-full pl-12 pr-12 py-2  bg-transparent text-sm backdrop-blur-sm border rounded-lg  text-zinc-800 dark:text-white placeholder-gray-400 transition-all duration-300 ${
+                          errors.password ? 'border-red-500 ' : 'border-white/20 '
                         }`}
                         placeholder="Create a password"
                       />
@@ -271,7 +270,7 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" />
+                      {/* <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" /> */}
                     </div>
                     {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                   </motion.div>
@@ -282,15 +281,15 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1, duration: 0.5 }}
                   >
-                    <label className="block text-sm font-medium text-gray-200 mb-2">Confirm Password *</label>
+                    <label className="block font-medium text-xs  text-zinc-600 dark:text-gray-200 mb-2">Confirm Password *</label>
                     <div className="relative group">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-cyan-400 transition-colors" />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5  transition-colors" />
                       <input
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={formData.confirmPassword}
                         onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                        className={`w-full pl-12 pr-12 py-4 bg-white/5 backdrop-blur-sm border rounded-xl text-white placeholder-gray-400 transition-all duration-300 ${
-                          errors.confirmPassword ? 'border-red-500 focus:ring-red-400' : 'border-white/20 focus:ring-2 focus:ring-cyan-400 focus:border-transparent'
+                        className={`w-full pl-12 pr-12 py-2  bg-transparent text-sm backdrop-blur-sm border rounded-lg text-zinc-800 dark:text-white placeholder-gray-400 transition-all duration-300 ${
+                          errors.confirmPassword ? 'border-red-500 ' : 'border-white/20 '
                         }`}
                         placeholder="Confirm your password"
                       />
@@ -301,7 +300,7 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                       >
                         {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" />
+                      {/* <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-purple-500/0 to-pink-500/0 group-focus-within:from-cyan-500/20 group-focus-within:via-purple-500/20 group-focus-within:to-pink-500/20 transition-all duration-300 pointer-events-none" /> */}
                     </div>
                     {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
                   </motion.div>
@@ -315,10 +314,10 @@ const FuturisticSignupForm: React.FC<FuturisticSignupFormProps> = ({ onBackToLog
                     transition={{ delay: 1.1, duration: 0.5 }}
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full text-zinc-800  dark:text-zinc-800 dark:bg-zinc-100 border border-zinc-500 font-semibold py-2 px-6 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="relative flex items-center space-x-2">
+                    {/* <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> */}
+                    <div className="relative flex items-center space-x-2 text-sm">
                       {isLoading ? (
                         <>
                           <Loader2 className="w-5 h-5 animate-spin" />

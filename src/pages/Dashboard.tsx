@@ -209,8 +209,8 @@ const Dashboard: React.FC = () => {
     </div>
   </div>
   <div>
-    <p className="text-white/80 text-xs md:text-sm font-medium">{stat.title}</p>
-    <p className="text-2xl md:text-3xl font-bold text-white mt-1">{stat.value}</p>
+    <p className="dark:text-white/80 text-zinc-800 text-xs md:text-sm font-medium">{stat.title}</p>
+    <p className="text-2xl md:text-3xl font-bold dark:text-white text-zinc-800 mt-1">{stat.value}</p>
   </div>
 </motion.div>
 

@@ -83,10 +83,10 @@ export const ResponsiveModal: React.FC<ResponsiveModalProps> = ({
               aria-labelledby="modal-title"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200/50 bg-white/10">
+              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200/50 bg-transparent">
                 <h2 
                   id="modal-title"
-                  className="text-lg sm:text-xl font-semibold text-gray-800 text-responsive-lg"
+                  className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-zinc-200 text-responsive-lg"
                 >
                   {title}
                 </h2>
