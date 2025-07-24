@@ -355,7 +355,7 @@ const VoiceAssessment: React.FC = () => {
                     value={assessmentText}
                     onChange={(e) => setAssessmentText(e.target.value)}
                     placeholder="Enter the text for students to read..."
-                    className="w-full h-20 p-3 border border-gray-200 dark:border-gray-600 rounded-xl  text-sm  resize-none bg-white dark:bg-transparent text-gray-900 dark:text-gray-100 text-sm"
+                    className="w-full h-20 p-3 border border-gray-200 dark:border-gray-600 rounded-xl  resize-none bg-white dark:bg-transparent text-gray-900 dark:text-gray-100 text-sm"
                   />
                 </div>
 

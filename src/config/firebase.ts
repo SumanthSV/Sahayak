@@ -26,36 +26,36 @@ export const functions = getFunctions(app);
 export const storage = getStorage(app);
 
 // Connect to emulators in development (only if not already connected)
-if (import.meta.env.DEV && !globalThis.__FIREBASE_EMULATOR_CONNECTED__) {
-  try {
-    try{
-      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-      console.log('Auth emulator connected');
-    }catch(error){
-      console.log('Auth emulator already connected or not available', error);
-    }
-    try{
-      connectFirestoreEmulator(db, 'localhost', 8080);
-      console.log('Firestore emulator connected');
-    }catch(error){
-      console.log('Firestore emulator already connected or not available', error);
-    }
+// if (import.meta.env.DEV && !globalThis.__FIREBASE_EMULATOR_CONNECTED__) {
+//   try {
+//     try{
+//       connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+//       console.log('Auth emulator connected');
+//     }catch(error){
+//       console.log('Auth emulator already connected or not available', error);
+//     }
+//     try{
+//       connectFirestoreEmulator(db, 'localhost', 8080);
+//       console.log('Firestore emulator connected');
+//     }catch(error){
+//       console.log('Firestore emulator already connected or not available', error);
+//     }
     
     
-    connectFunctionsEmulator(functions, 'localhost', 5001);
-    globalThis.__FIREBASE_EMULATOR_CONNECTED__ = true;
-  } catch (error) {
-    console.log('Emulators already connected or not available'+error);
-  }
-}
+//     connectFunctionsEmulator(functions, 'localhost', 5001);
+//     globalThis.__FIREBASE_EMULATOR_CONNECTED__ = true;
+//   } catch (error) {
+//     console.log('Emulators already connected or not available'+error);
+//   }
+// }
 
-// Enable offline persistence
-enableIndexedDbPersistence(db).catch((err) => {
-  if (err.code === 'failed-precondition') {
-    console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-  } else if (err.code === 'unimplemented') {
-    console.warn('The current browser does not support all of the features required to enable persistence');
-  }
-});
+// // Enable offline persistence
+// enableIndexedDbPersistence(db).catch((err) => {
+//   if (err.code === 'failed-precondition') {
+//     console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+//   } else if (err.code === 'unimplemented') {
+//     console.warn('The current browser does not support all of the features required to enable persistence');
+//   }
+// });
 
 export default app;

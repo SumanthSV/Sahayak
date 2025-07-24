@@ -7,8 +7,6 @@ import {
   BookOpen,
   GraduationCap,
   Globe,
-  Palette,
-  Save,
   Mic,
   MicOff
 } from 'lucide-react';

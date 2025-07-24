@@ -8,16 +8,14 @@ import { GoogleGenAI, Modality } from "@google/genai";
 
 admin.initializeApp();
 
-
-
 // Enhanced Story Generation with personalization
 export const generatePersonalizedStory = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
   const { prompt, language, grade, subject, studentName, localContext, previousFeedback } = request.data;
   
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-    
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    console.log(model);
     const personalizedPrompt = `
       Create an educational story in ${language} for grade ${grade} students about: ${prompt}
       
@@ -154,6 +152,7 @@ export const generateDifferentiatedWorksheet = onCall({ secrets: ['GEMINI_API_KE
 
 // Visual Aid Generation with Actual Image Generatio
 export const generateVisualAidWithImage = onCall({ secrets: ['GEMINI_API_KEY'] },async (request) => {
+  console.log("generateVisualAidWithImage is calling");
   try {
     const { topic, subject, grade, language, imageType } = request.data || {};
 

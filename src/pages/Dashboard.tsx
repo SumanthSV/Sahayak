@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 import { 
   BookOpen, 
   FileText, 
   Users, 
   Calendar,
-  Play,
+ 
   Download,
   Eye,
   Trash2,
@@ -15,7 +15,6 @@ import {
   VolumeX,
   ImageIcon
 } from 'lucide-react'; 
-import { Image } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { FirebaseService, GeneratedContent, GeneratedImage, UserData } from '../services/firebaseService';
 import { Modal } from '../components/UI/Modal';
@@ -24,7 +23,7 @@ import toast from 'react-hot-toast';
 import '../index.css'
 
 const Dashboard: React.FC = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { user } = useAuth();
   const [savedContent, setSavedContent] = useState<GeneratedContent[]>([]);
   const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]);

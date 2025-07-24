@@ -84,7 +84,7 @@ const Sidebar: React.FC<ModernSidebarProps> = ({ isOpen, onToggle, isMobile }) =
             className="flex items-center space-x-3"
           >
             <div className={`   bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg`}>
-              <img src={Logo2} className={`w-6 h-6 object-contain  ${isCollapsed ?"w-0 h-0" :"w-8 h-8"} `} alt="" />
+              <img src={Logo2} className={`object-contain  ${isCollapsed ?"w-0 h-0" :"w-8 h-8"} `} alt="" />
             </div>
             {/* <AnimatePresence> */}
               {!isCollapsed && (

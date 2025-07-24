@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
+// import { useTranslation } from 'react-i18next';
 import { 
   Users, 
   Plus, 
@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { FirebaseService, Student, StudentMark } from '../services/firebaseService';
-import { Modal } from '../components/UI/Modal';
+// import { Modal } from '../components/UI/Modal';
 import { ResponsiveModal } from '../components/UI/ResponsiveModal';
 import toast from 'react-hot-toast';
 
@@ -51,7 +51,7 @@ interface ClassStats {
 }
 
 const StudentTracker: React.FC = () => {
-  const { t } = useTranslation();
+  // const { t } = useTranslation();
   const { user } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [studentMarks, setStudentMarks] = useState<StudentMark[]>([]);
